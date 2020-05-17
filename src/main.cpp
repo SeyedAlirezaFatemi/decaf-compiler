@@ -4,8 +4,8 @@
  * You should not need to modify this file.
  */
  
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include "utility.h"
 #include "errors.h"
 #include "scanner.h"
@@ -20,7 +20,7 @@
 static void PrintOneToken(TokenType token, const char *text, YYSTYPE value,
                           yyltype loc)
 {
-  char buffer[] = {'\'', token, '\'', '\0'};
+  char buffer[] = {'\'', static_cast<char>(token), '\'', '\0'};
   const char *name = token >= T_Void ? gTokenNames[token - T_Void] : buffer;
   
   printf("%-12s line %d cols %d-%d is %s ", text,
@@ -36,7 +36,7 @@ static void PrintOneToken(TokenType token, const char *text, YYSTYPE value,
     case T_BoolConstant:    
       printf("(value = %s)\n", value.boolConstant ? "true" : "false"); break;
     case T_Identifier:
-	if (strcmp(text, value.identifier)) {
+	if (strcmp(text, value.identifier) != 0) {
 	  printf("(truncated to %s)\n", value.identifier);
 	  break;
 	}

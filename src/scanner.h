@@ -9,6 +9,7 @@
 #define _H_scanner
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #define MaxIdentLen 31    // Maximum length for identifiers
 

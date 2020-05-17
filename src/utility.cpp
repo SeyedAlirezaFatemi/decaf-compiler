@@ -5,8 +5,8 @@
  */
 
 #include "utility.h"
-#include <stdarg.h>
-#include <string.h>
+#include <cstdarg>
+#include <cstring>
 #include <vector>
 using std::vector;
 

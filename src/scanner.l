@@ -50,7 +50,8 @@ static void DoBeforeEachAction();
 
 #define TAB_SIZE 8
 
-int lineno, colno;
+int line_number, colno;
+bool yy_flex_debug;
 %}
 
  /* The section before the first %% is the Definitions section of the lex
@@ -78,7 +79,7 @@ IDENTIFIER         ([a-zA-Z][a-zA-Z0-9_]*)
   */ 
 
  /* skip over white space */
-[\n]                   { colno = 1; lineno++; }
+[\n]                   { colno = 1; line_number++; }
 [\t]                   { colno += TAB_SIZE - colno % TAB_SIZE + 1; }
 [ ]                    ;
 
@@ -163,7 +164,7 @@ ReadLine               { return T_ReadLine; }
 
  /* consume single-line comment */
 \/\/.*\n                { 
-                          lineno++; 
+                          line_number++; 
                           colno = 1;
                         }
 \/\*.*\*\/              ;
@@ -175,7 +176,7 @@ ReadLine               { return T_ReadLine; }
 \/\*                    { BEGIN COMMENT; }
 <COMMENT>.              ;
 <COMMENT>[\r\n]         { 
-                          lineno++; 
+                          line_number++; 
                           colno = 1;
 			            }
 <COMMENT>\*\/           { BEGIN INITIAL; }
@@ -189,7 +190,7 @@ ReadLine               { return T_ReadLine; }
   */
 \"[^\"\n]*\n            { 
                           ReportError::UntermString(&yylloc, yytext);       
-                          lineno++;
+                          line_number++;
                           colno = 1;
                         }
 
@@ -221,7 +222,7 @@ void InitScanner()
 {
     PrintDebug("lex", "Initializing scanner");
     yy_flex_debug = true;
-    lineno = 1;
+    line_number = 1;
     colno = 1;
 }
 
@@ -233,7 +234,7 @@ void InitScanner()
  */
 static void DoBeforeEachAction()
 {
-  yylloc.first_line = yylloc.last_line = lineno;
+  yylloc.first_line = yylloc.last_line = line_number;
 
   yylloc.first_column = colno;
   yylloc.last_column = colno + yyleng - 1;

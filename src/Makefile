@@ -6,7 +6,7 @@
 
 # Set the default target. When you make with no arguments,
 # this will be the target built.
-COMPILER = gcc
+COMPILER = dcc
 PRODUCTS = $(COMPILER) $(PREPROCESSOR)
 default: $(PRODUCTS)
 
@@ -21,7 +21,7 @@ JUNK = *.log *~ *.o lex.yy.c dpp.yy.c y.tab.c y.tab.h *.core core
 # Define the tools we are going to use
 CC = g++
 LD = g++
-LEX = flex
+LEX = flex++
 YACC = bison
 
 # Set up the necessary flags for the tools
@@ -49,7 +49,7 @@ LIBS = -lc -lm -ll
 .yy.o: $*.yy.c
 	$(CC) $(CFLAGS) -c -o $@ $*.cc
 
-lex.yy.c: scanner.l 
+lex.yy.cc: scanner.l
 	$(LEX) $(LEXFLAGS) scanner.l
 
 .cc.o: $*.cc
