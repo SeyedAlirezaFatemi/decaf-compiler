@@ -133,39 +133,39 @@ ReadLine               { return T_ReadLine; }
                          }
 {BOOLEAN}                { 
                            if (strcmp("true", yytext) == 0)
-                               yylval.boolConstant = true;
+                              yylval.boolConstant = true;
                            else
-			       yylval.boolConstant = false;
+			                        yylval.boolConstant = false;
                            return T_BoolConstant;
                          }
 {DECIMAL}                { 
                            yylval.integerConstant = strtol(yytext, NULL, 10); return T_IntConstant; 
-			 }
+		                 }
 {HEXADECIMAL}            {
                           yylval.integerConstant = strtol(yytext, NULL, 16); 
-			  return T_IntConstant;
+			                    return T_IntConstant;
                          }
 {FLOAT}                  { 
                            yylval.doubleConstant = atof(yytext); return T_DoubleConstant; 
-			 }
+			             }
 
  /* recognize identifiers, 
   * return the correct token and set appropriate fields of yylval 
   */
 {IDENTIFIER}             { 
                           if (yyleng > MaxIdentLen)
-        	            ReportError::LongIdentifier(&yylloc, yytext);
-			  strncpy(yylval.identifier, yytext, MaxIdentLen);
-			  yylval.identifier[MaxIdentLen] = '\0';   
-			  
-			  return T_Identifier;
-		        }
+        	                  ReportError::LongIdentifier(&yylloc, yytext);
+                          strncpy(yylval.identifier, yytext, MaxIdentLen);
+                          yylval.identifier[MaxIdentLen] = '\0';   
+                          
+                          return T_Identifier;
+                         }
 
  /* consume single-line comment */
 \/\/.*\n                { 
                           lineno++; 
-			  colno = 1;
-			}
+                          colno = 1;
+                        }
 \/\*.*\*\/              ;
 
  /* consume multi-line comments 
@@ -177,26 +177,26 @@ ReadLine               { return T_ReadLine; }
 <COMMENT>[\r\n]         { 
                           lineno++; 
                           colno = 1;
-			}
+			            }
 <COMMENT>\*\/           { BEGIN INITIAL; }
 <COMMENT><<EOF>>        { 
-			  ReportError::UntermComment();
-			  BEGIN INITIAL;
-			}
+                          ReportError::UntermComment();
+                          BEGIN INITIAL;
+                        }
 
  /* report lexical error for improper strings 
   * and invalid characters
   */
 \"[^\"\n]*\n            { 
                           ReportError::UntermString(&yylloc, yytext);       
-			  lineno++;
-			  colno = 1;
-			} 
+                          lineno++;
+                          colno = 1;
+                        }
 
  /* all other characters are reported as errors */
 .                       { 
                           ReportError::UnrecogChar(&yylloc, yytext[0]);     
-			}
+			            }
 
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
@@ -215,8 +215,7 @@ ReadLine               { return T_ReadLine; }
  * yy_flex_debug that controls whether flex prints debugging information
  * about each token and what rule was matched. If set to false, no information
  * is printed. Setting it to true will give you a running trail that might
- * be helpful when debugging your scanner. Please be sure the variable is
- * set to false when submitting your final version.
+ * be helpful when debugging your scanner.
  */
 void InitScanner()
 {
