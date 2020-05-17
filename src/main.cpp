@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 {
     ParseCommandLine(argc, argv);
     FlexLexer* lexer = new yyFlexLexer;
-    InitScanner();
+    InitScanner(lexer);
     TokenType token;
     while ((token = (TokenType)lexer->yylex()) != 0){
         PrintOneToken(token, lexer->YYText(), yylval, yylloc);

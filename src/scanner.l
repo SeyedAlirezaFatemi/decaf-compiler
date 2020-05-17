@@ -51,6 +51,7 @@ static void DoBeforeEachAction();
 #define TAB_SIZE 8
 
 int line_number, colno;
+FlexLexer* lexer;
 %}
 
  /* The section before the first %% is the Definitions section of the lex
@@ -72,6 +73,7 @@ FLOAT              ({DECIMAL}\.{DECIMAL}?((E|e)(\+|\-)?{DECIMAL})?)
 IDENTIFIER         ([a-zA-Z][a-zA-Z0-9_]*)
 
 %x COMMENT
+%option noyywrap
 %%             /* BEGIN RULES SECTION */
  /* All patterns and actions should be placed between the start and stop
   * %% markers which delimit the Rules section. 
@@ -217,11 +219,12 @@ ReadLine               { return T_ReadLine; }
  * is printed. Setting it to true will give you a running trail that might
  * be helpful when debugging your scanner.
  */
-void InitScanner()
+void InitScanner(FlexLexer* lexer)
 {
     PrintDebug("lex", "Initializing scanner");
     line_number = 1;
     colno = 1;
+    lexer = lexer;
 }
 
 
@@ -235,6 +238,6 @@ static void DoBeforeEachAction()
   yylloc.first_line = yylloc.last_line = line_number;
 
   yylloc.first_column = colno;
-  yylloc.last_column = colno + yyleng - 1;
-  colno = colno + yyleng;
+  yylloc.last_column = colno + lexer->YYLeng() - 1;
+  colno = colno + lexer->YYLeng();
 }
