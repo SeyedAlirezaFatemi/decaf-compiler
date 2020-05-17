@@ -68,7 +68,7 @@ strip : $(PRODUCTS)
 	rm -rf $(JUNK)
 
 
-# make depend will set up the header file dependencies for the 
+# make depend will set up the header file dependencies for the
 # assignment.  You should make depend whenever you add a new header
 # file to the project or move the project between machines
 #
@@ -77,4 +77,3 @@ depend:
 
 clean:
 	@rm -rf $(JUNK) y.output $(PRODUCTS) $(TEST)
-

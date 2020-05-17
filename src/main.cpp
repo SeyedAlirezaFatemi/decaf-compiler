@@ -6,6 +6,7 @@
  
 #include <cstring>
 #include <cstdio>
+#include <FlexLexer.h>
 #include "utility.h"
 #include "errors.h"
 #include "scanner.h"
@@ -55,9 +56,11 @@ static void PrintOneToken(TokenType token, const char *text, YYSTYPE value,
 int main(int argc, char *argv[])
 {
     ParseCommandLine(argc, argv);
+    FlexLexer* lexer = new yyFlexLexer;
     InitScanner();
     TokenType token;
-    while ((token = (TokenType)yylex()) != 0) 
-        PrintOneToken(token, yytext, yylval, yylloc);
+    while ((token = (TokenType)lexer->yylex()) != 0){
+        PrintOneToken(token, lexer->YYText(), yylval, yylloc);
+    }
     return (ReportError::NumErrors() == 0? 0 : -1);
 }

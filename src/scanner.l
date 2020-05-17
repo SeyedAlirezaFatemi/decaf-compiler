@@ -51,7 +51,6 @@ static void DoBeforeEachAction();
 #define TAB_SIZE 8
 
 int line_number, colno;
-bool yy_flex_debug;
 %}
 
  /* The section before the first %% is the Definitions section of the lex
@@ -112,7 +111,7 @@ ReadLine               { return T_ReadLine; }
   * and return the ASCII value as the token 
   */
 {PUNCTUATION} |
-{OPERATOR}             { return yytext[0]; }
+{OPERATOR}             { return YYText()[0]; }
 
 
  /* recognize two-character operators and return the correct token */
@@ -129,25 +128,25 @@ ReadLine               { return T_ReadLine; }
   * and set appropriate filed of yylval 
   */
 {CHARS}                  { 
-                           yylval.stringConstant = strdup(yytext);
+                           yylval.stringConstant = strdup(YYText());
                            return T_StringConstant;
                          }
 {BOOLEAN}                { 
-                           if (strcmp("true", yytext) == 0)
+                           if (strcmp("true", YYText()) == 0)
                               yylval.boolConstant = true;
                            else
 			                        yylval.boolConstant = false;
                            return T_BoolConstant;
                          }
 {DECIMAL}                { 
-                           yylval.integerConstant = strtol(yytext, NULL, 10); return T_IntConstant; 
+                           yylval.integerConstant = strtol(YYText(), NULL, 10); return T_IntConstant;
 		                 }
 {HEXADECIMAL}            {
-                          yylval.integerConstant = strtol(yytext, NULL, 16); 
+                          yylval.integerConstant = strtol(YYText(), NULL, 16);
 			                    return T_IntConstant;
                          }
 {FLOAT}                  { 
-                           yylval.doubleConstant = atof(yytext); return T_DoubleConstant; 
+                           yylval.doubleConstant = atof(YYText()); return T_DoubleConstant;
 			             }
 
  /* recognize identifiers, 
@@ -155,8 +154,8 @@ ReadLine               { return T_ReadLine; }
   */
 {IDENTIFIER}             { 
                           if (yyleng > MaxIdentLen)
-        	                  ReportError::LongIdentifier(&yylloc, yytext);
-                          strncpy(yylval.identifier, yytext, MaxIdentLen);
+        	                  ReportError::LongIdentifier(&yylloc, YYText());
+                          strncpy(yylval.identifier, YYText(), MaxIdentLen);
                           yylval.identifier[MaxIdentLen] = '\0';   
                           
                           return T_Identifier;
@@ -189,14 +188,14 @@ ReadLine               { return T_ReadLine; }
   * and invalid characters
   */
 \"[^\"\n]*\n            { 
-                          ReportError::UntermString(&yylloc, yytext);       
+                          ReportError::UntermString(&yylloc, YYText());
                           line_number++;
                           colno = 1;
                         }
 
  /* all other characters are reported as errors */
 .                       { 
-                          ReportError::UnrecogChar(&yylloc, yytext[0]);     
+                          ReportError::UnrecogChar(&yylloc, YYText()[0]);
 			            }
 
 %%
@@ -221,7 +220,6 @@ ReadLine               { return T_ReadLine; }
 void InitScanner()
 {
     PrintDebug("lex", "Initializing scanner");
-    yy_flex_debug = true;
     line_number = 1;
     colno = 1;
 }
