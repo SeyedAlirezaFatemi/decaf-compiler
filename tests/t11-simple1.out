@@ -1,0 +1,45 @@
+{
+-
+T_INTLITERAL 123
+-
+T_ID a35
+,
+T_ID id3a
+,
++
+*
+;
+}
+[
+||
+==
+=
+!=
+(
+)
+&&
+]
+<
+>
+<=
+>=
+=
+T_ID a
+[
+T_INTLITERAL 24
+]
+=
+T_STRINGLITERAL "7"
+;
+T_ID n
+!=
+if
+;
+T_BOOLEANLITERAL false
+,
+-
+if
+;
+T_ID true32
+;
+T_ID forpar
