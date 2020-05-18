@@ -51,7 +51,7 @@ static void DoBeforeEachAction();
 #define TAB_SIZE 8
 
 int line_number, colno;
-FlexLexer* lexer;
+FlexLexer* currentLexer;
 %}
 
  /* The section before the first %% is the Definitions section of the lex
@@ -224,7 +224,7 @@ void InitScanner(FlexLexer* lexer)
     PrintDebug("lex", "Initializing scanner");
     line_number = 1;
     colno = 1;
-    lexer = lexer;
+    currentLexer = lexer;
 }
 
 
@@ -238,6 +238,6 @@ static void DoBeforeEachAction()
   yylloc.first_line = yylloc.last_line = line_number;
 
   yylloc.first_column = colno;
-  yylloc.last_column = colno + lexer->YYLeng() - 1;
-  colno = colno + lexer->YYLeng();
+  yylloc.last_column = colno + currentLexer->YYLeng() - 1;
+  colno = colno + currentLexer->YYLeng();
 }
