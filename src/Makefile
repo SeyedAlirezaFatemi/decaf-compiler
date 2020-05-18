@@ -1,7 +1,3 @@
-## 
-## Simple makefile for CS143 programming projects
-##
-
 .PHONY: clean strip
 
 # Set the default target. When you make with no arguments,

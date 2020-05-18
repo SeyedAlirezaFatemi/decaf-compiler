@@ -57,7 +57,7 @@ class ReportError {
   
  private:
   static void UnderlineErrorInLine(const char *line, yyltype *pos);
-  static void OutputError(yyltype *loc, string msg);
+  static void OutputError(yyltype *loc, const string& msg);
   static int numErrors;
 };
 #endif
