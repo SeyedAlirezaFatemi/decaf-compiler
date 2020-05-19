@@ -1,5 +1,5 @@
 #!/bin/bash
-mkdir -p out
+mkdir -p ../out/
 cd ../tests
 prefix="t" ;
 dirlist=(`ls ${prefix}*.in`) ;

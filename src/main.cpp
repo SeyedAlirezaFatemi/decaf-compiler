@@ -72,8 +72,7 @@ int main(int argc, char *argv[]) {
 //    string output_file_name = "../out/test.txt";
 
     std::ifstream my_input_file(input_file_name);
-    std::ofstream my_output_file(output_file_name,
-                                 std::fstream::in | std::fstream::out | std::fstream::app | std::ofstream::trunc);
+    std::ofstream my_output_file(output_file_name);
 
 //    ParseCommandLine(argc, argv);
     FlexLexer *lexer = new yyFlexLexer(my_input_file, my_output_file);
