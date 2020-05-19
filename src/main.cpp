@@ -27,6 +27,7 @@ static void PrintOneToken(std::ofstream &output_file, TokenType token, const cha
             printf("(value = %d)\n", value.integerConstant);
             break;
         case T_DoubleConstant:
+            output_file << "T_DOUBLELITERAL " << text << endl;
             printf("(value = %g)\n", value.doubleConstant);
             break;
         case T_StringConstant:
@@ -60,20 +61,21 @@ static void PrintOneToken(std::ofstream &output_file, TokenType token, const cha
  * InitScanner() is used to set up the scanner.
  */
 int main(int argc, char *argv[]) {
-//    if (argc < 5) {
-//        cerr << "Usage: " << argv[0] << " -i <input> -o <output>" << endl;
-//        return 1;
-//    }
+    if (argc < 5) {
+        cerr << "Usage: " << argv[0] << " -i <input> -o <output>" << endl;
+        return 1;
+    }
 
-//    string input_file_name = argv[2];
-//    string output_file_name = argv[4];
-    string input_file_name = "../tests/t11-simple1.in";
-    string output_file_name = "../out/test.txt";
+    string input_file_name = argv[2];
+    string output_file_name = argv[4];
+//    string input_file_name = "../tests/t07-operator1.in";
+//    string output_file_name = "../out/test.txt";
 
     std::ifstream my_input_file(input_file_name);
-    std::ofstream my_output_file(output_file_name, std::ios::in | std::ios::out);
+    std::ofstream my_output_file(output_file_name,
+                                 std::fstream::in | std::fstream::out | std::fstream::app | std::ofstream::trunc);
 
-    ParseCommandLine(argc, argv);
+//    ParseCommandLine(argc, argv);
     FlexLexer *lexer = new yyFlexLexer(my_input_file, my_output_file);
     cout << lexer->YYLeng();
     InitScanner(lexer);
@@ -83,5 +85,6 @@ int main(int argc, char *argv[]) {
     }
     my_output_file.flush();
     my_output_file.close();
-    return (ReportError::NumErrors() == 0 ? 0 : -1);
+//    return (ReportError::NumErrors() == 0 ? 0 : -1);
+    return 0;
 }
