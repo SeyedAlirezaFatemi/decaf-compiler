@@ -21,7 +21,7 @@ do
         echo "Code did not Compiler"
     else
         echo "Core compiled successfully"
-        ./dcc -i ${TEST_DIRECTORY}${filelist} -o ${OUTPUT_DIRECTORY}${output_filename}
+        ./main -i ${TEST_DIRECTORY}${filelist} -o ${OUTPUT_DIRECTORY}${output_filename}
         if [[ $? -eq 0 ]]; then
             echo "Code Executed Successfully!"
             if command -v python3; then
