@@ -1,9 +1,11 @@
 #include <cstring>
 #include <FlexLexer.h>
 #include <fstream>
+#include "iostream"
 #include "errors.h"
 #include "scanner.h"
 #include "location.h"
+#include "utility.h"
 
 /* Function: PrintOneToken()
  * Usage: PrintOneToken(T_Double, "3.5", val, loc);
@@ -11,7 +13,7 @@
  * We supply this function to print information about the tokens returned
  * by the lexer.
  */
-static void PrintOneToken(TokenType token, const char *text, YYSTYPE value,
+static void PrintOneToken(std::ofstream &output_file, TokenType token, const char *text, YYSTYPE value,
                           yyltype loc) {
     char buffer[] = {'\'', static_cast<char>(token), '\'', '\0'};
     const char *name = token >= T_Void ? gTokenNames[token - T_Void] : buffer;
@@ -21,15 +23,18 @@ static void PrintOneToken(TokenType token, const char *text, YYSTYPE value,
 
     switch (token) {
         case T_IntConstant:
+            output_file << "T_INTLITERAL " << text << endl;
             printf("(value = %d)\n", value.integerConstant);
             break;
         case T_DoubleConstant:
             printf("(value = %g)\n", value.doubleConstant);
             break;
         case T_StringConstant:
+            output_file << "T_STRINGLITERAL " << value.stringConstant << endl;
             printf("(value = %s)\n", value.stringConstant);
             break;
         case T_BoolConstant:
+            output_file << "T_BOOLEANLITERAL " << (value.boolConstant ? "true" : "false") << endl;
             printf("(value = %s)\n", value.boolConstant ? "true" : "false");
             break;
         case T_Identifier:
@@ -37,7 +42,11 @@ static void PrintOneToken(TokenType token, const char *text, YYSTYPE value,
                 printf("(truncated to %s)\n", value.identifier);
                 break;
             }
+            output_file << "T_ID " << text << endl;
+            printf("\n");
+            break;
         default:
+            output_file << text << endl;
             printf("\n");
             break;
     }
@@ -51,25 +60,28 @@ static void PrintOneToken(TokenType token, const char *text, YYSTYPE value,
  * InitScanner() is used to set up the scanner.
  */
 int main(int argc, char *argv[]) {
-//    if (argc < 5 ){
-//        cerr<< "Usage: " << argv[0] << " -i <input> -o <output>" << endl ;
+//    if (argc < 5) {
+//        cerr << "Usage: " << argv[0] << " -i <input> -o <output>" << endl;
 //        return 1;
 //    }
 
-    string input_file_name = "../tests/t02-keyword1.in";
-    string output_file_name = "test.txt";
-    std::ifstream my_input_file; // an input file stream object
-    std::ofstream my_output_file;
-    my_input_file.open(input_file_name);
-    my_output_file.open(output_file_name);
+//    string input_file_name = argv[2];
+//    string output_file_name = argv[4];
+    string input_file_name = "../tests/t11-simple1.in";
+    string output_file_name = "../out/test.txt";
 
-//    ParseCommandLine(argc, argv);
+    std::ifstream my_input_file(input_file_name);
+    std::ofstream my_output_file(output_file_name, std::ios::in | std::ios::out);
+
+    ParseCommandLine(argc, argv);
     FlexLexer *lexer = new yyFlexLexer(my_input_file, my_output_file);
     cout << lexer->YYLeng();
     InitScanner(lexer);
     TokenType token;
     while ((token = (TokenType) lexer->yylex()) != 0) {
-        PrintOneToken(token, lexer->YYText(), yylval, yylloc);
+        PrintOneToken(my_output_file, token, lexer->YYText(), yylval, yylloc);
     }
+    my_output_file.flush();
+    my_output_file.close();
     return (ReportError::NumErrors() == 0 ? 0 : -1);
 }

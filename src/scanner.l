@@ -1,6 +1,6 @@
 /* File:  scanner.l
  * ----------------
- * Lex inupt file to generate the scanner for the compiler.
+ * Lex input file to generate the scanner for the compiler.
  */
 
 %{
@@ -22,11 +22,9 @@
  * -----------------------
  * This global variable is how we get attribute information about the token
  * just scanned to the client. The scanner sets the global variable
- * appropriately and since it's global the client can just read it.  In the
- * future, this variable will be declared for us in the y.tab.c file
- * produced by Yacc, but for now, we declare it manually.
+ * appropriately and since it's global the client can just read it.
  */
-YYSTYPE yylval;  // manually declared for pp1, later Yacc provides
+YYSTYPE yylval;
 
 /* Global variable: yylloc
  * -----------------------
@@ -182,7 +180,7 @@ ReadLine               { return T_ReadLine; }
 			            }
 <COMMENT>\*\/           { BEGIN INITIAL; }
 <COMMENT><<EOF>>        { 
-                          ReportError::UntermComment();
+                          ReportError::UnterminatedComment();
                           BEGIN INITIAL;
                         }
 
@@ -190,14 +188,14 @@ ReadLine               { return T_ReadLine; }
   * and invalid characters
   */
 \"[^\"\n]*\n            { 
-                          ReportError::UntermString(&yylloc, YYText());
+                          ReportError::UnterminatedString(&yylloc, YYText());
                           line_number++;
                           colno = 1;
                         }
 
  /* all other characters are reported as errors */
 .                       { 
-                          ReportError::UnrecogChar(&yylloc, YYText()[0]);
+                          ReportError::UnrecognizedChar(&yylloc, YYText()[0]);
 			            }
 
 %%

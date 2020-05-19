@@ -15,18 +15,17 @@ using namespace std;
 
 int ReportError::numErrors = 0;
 
-
-void ReportError::OutputError(yyltype *loc, const string& msg) {
+void ReportError::OutputError(yyltype *loc, const string &msg) {
     numErrors++;
     fflush(stdout); // make sure any buffered text has been output
     // change cerr to cout since cerr can't be redirected
     if (loc) {
         cout << endl << "*** Error line " << loc->first_line << "." << endl;
-    } else
+    } else {
         cout << endl << "*** Error." << endl;
+    }
     cout << "*** " << msg << endl << endl;
 }
-
 
 void ReportError::Formatted(yyltype *loc, const char *format, ...) {
     va_list args;
@@ -38,10 +37,9 @@ void ReportError::Formatted(yyltype *loc, const char *format, ...) {
     OutputError(loc, errbuf);
 }
 
-void ReportError::UntermComment() {
+void ReportError::UnterminatedComment() {
     OutputError(nullptr, "Input ends with unterminated comment");
 }
-
 
 void ReportError::LongIdentifier(yyltype *loc, const char *ident) {
     ostringstream s;
@@ -49,13 +47,13 @@ void ReportError::LongIdentifier(yyltype *loc, const char *ident) {
     OutputError(loc, s.str());
 }
 
-void ReportError::UntermString(yyltype *loc, const char *str) {
+void ReportError::UnterminatedString(yyltype *loc, const char *str) {
     ostringstream s;
     s << "Unterminated string constant: " << str;
     OutputError(loc, s.str());
 }
 
-void ReportError::UnrecogChar(yyltype *loc, char ch) {
+void ReportError::UnrecognizedChar(yyltype *loc, char ch) {
     ostringstream s;
     s << "Unrecognized char: '" << ch << "'";
     OutputError(loc, s.str());

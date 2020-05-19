@@ -3,11 +3,7 @@
  * --------------
  * This file defines an error-reporting class with a set of already
  * implemented static methods for reporting the standard Decaf errors.
- * You should report all errors via this class so that your error
- * messages will have the same wording/spelling as ours and thus
- * diff can easily compare the two. If needed, you can add new
- * methods if you have some fancy error-reporting, but for the most
- * part, you will just use the class as given.
+ * You should report all errors via this class.
  */
 
 #ifndef _errors_h_
@@ -20,7 +16,7 @@ using namespace std;
 /**
  * General notes on using this class
  * ----------------------------------
- * Each of the methods in thie class matches one of the standard Decaf
+ * Each of the methods in this class matches one of the standard Decaf
  * errors and reports a specific problem such as an unterminated string,
  * type mismatch, declaration conflict, etc. You will call these methods
  * to report problems encountered during the analysis phases. All methods
@@ -28,7 +24,7 @@ using namespace std;
  * the class name, e.g.
  *
  *    if (missingEnd) { 
- *       ReportError::UntermString(&yylloc, str);
+ *       ReportError::UnterminatedString(&yylloc, str);
  *    }
  *
  * For some methods, the first argument is the pointer to the location
@@ -43,14 +39,13 @@ using namespace std;
 class ReportError {
  public:
   // Errors used by scanner
-  static void UntermComment(); 
+  static void UnterminatedComment();
   static void LongIdentifier(yyltype *loc, const char *ident);
-  static void UntermString(yyltype *loc, const char *str);
-  static void UnrecogChar(yyltype *loc, char ch);
+  static void UnterminatedString(yyltype *loc, const char *str);
+  static void UnrecognizedChar(yyltype *loc, char ch);
 
   // Generic method to report a printf-style error message
   static void Formatted(yyltype *loc, const char *format, ...);
-
 
   // Returns number of error messages printed
   static int NumErrors() { return numErrors; }

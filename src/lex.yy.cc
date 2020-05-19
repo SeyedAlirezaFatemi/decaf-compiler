@@ -1211,8 +1211,8 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
 #line 185 "scanner.l"
-{ 
-                          ReportError::UntermComment();
+{
+    ReportError::UnterminatedComment();
                           BEGIN INITIAL;
                         }
 	YY_BREAK
@@ -1223,8 +1223,8 @@ case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
 #line 193 "scanner.l"
-{ 
-                          ReportError::UntermString(&yylloc, YYText());
+{
+    ReportError::UnterminatedString(&yylloc, YYText());
                           line_number++;
                           colno = 1;
                         }
@@ -1233,8 +1233,8 @@ YY_RULE_SETUP
 case 48:
 YY_RULE_SETUP
 #line 200 "scanner.l"
-{ 
-                          ReportError::UnrecogChar(&yylloc, YYText()[0]);
+{
+    ReportError::UnrecognizedChar(&yylloc, YYText()[0]);
 			            }
 	YY_BREAK
 case 49:
