@@ -24,8 +24,9 @@ def main(argv):
         from .parser import decaf_parser
 
         try:
-            decaf_parser.parse(inputfile)
-        except:
+            decaf_parser.parse(input_file.read())
+        except BaseException as e:
+            # print(e)
             success = False
 
     with open("out/" + outputfile, "w") as output_file:

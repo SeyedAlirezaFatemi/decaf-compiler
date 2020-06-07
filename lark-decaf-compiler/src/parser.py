@@ -33,7 +33,7 @@ field: variable_decl
 
 interface_decl: "interface" IDENT "{" (prototype)* "}"
 
-prototype: type IDENT "(" formals ");"
+prototype: type IDENT "(" formals ")" ";"
     | "void" IDENT "(" formals ")" ";"
 
 stmt_block: "{" (variable_decl)* (stmt)* "}"
@@ -124,15 +124,12 @@ MULTILINE_COMMENT : /\/\*(\*(?!\/)|[^*])*\*\//
 )
 
 text = """
-class Main {
-int x;
-void main() {
-x = 0xf;
-y = 0xff;
-z = true;
-;
-Print(z);
-return 0;
+
+interface Flying {
+    void fly();
+    int getAltitude();
+    void setAltitude(int alt);
 }
-}"""
-print(decaf_parser.parse(text).pretty())
+
+"""
+# print(decaf_parser.parse(text).pretty())
