@@ -1,0 +1,4 @@
+
+class getClass() { // a little innocent looking
+    return the_class;
+}

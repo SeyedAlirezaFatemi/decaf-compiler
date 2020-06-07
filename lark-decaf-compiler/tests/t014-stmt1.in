@@ -1,0 +1,23 @@
+
+int main() {
+    int x;
+    int y;
+    int i;
+    int j;
+
+    if (x < 10)
+        x = 0;
+    else
+        x = x + 1;
+
+    while (x < 10) {
+        for (i = 0; i >= x; i = i + 1) {
+            y = y - x * 2;
+        }
+        if (y != x) break;
+    }
+
+    Print("Result is ", y);
+
+    return 0;
+}

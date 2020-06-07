@@ -1,0 +1,9 @@
+
+int main() {
+    int a;
+    a = ReadInteger();
+    if (a < 5)
+        for (;;) /* required part is missing */
+            a = a + 1;
+    return a;
+}

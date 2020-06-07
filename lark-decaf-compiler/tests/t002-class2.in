@@ -1,0 +1,24 @@
+class A {
+    int a;
+}
+
+class B {
+    int b;
+}
+
+// inheritance at its finest!
+class C extends A {
+    void do_job() {}
+}
+
+int main() {
+    C c;
+    A a;
+    c = new C;
+    c.do_job();
+
+    a = c;
+    c = null;
+
+    return 99;
+}

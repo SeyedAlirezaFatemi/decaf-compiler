@@ -1,0 +1,21 @@
+
+// just a simple, stupid function
+int func1(int a, int b) {
+    return a + b;
+}
+
+// another one
+void func2(string a, int r) {
+    int i;
+    for (i = 1; i <= r; i = i + 1)
+        Print(a); // stdout they call it?
+    /* return */
+}
+
+int read_input_and_check() {
+    int a;
+    a = ReadInteger();
+    if (0 > a && a < 100)
+        return a;
+    return -1;
+}

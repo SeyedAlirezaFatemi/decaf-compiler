@@ -1,0 +1,22 @@
+
+interface Flying {
+    void fly();
+    int getAltitude();
+    void setAltitude(int alt);
+}
+
+class Bird implements Flying {
+    int altitude;
+
+    void fly() {
+        Print("Flying Now!");
+    }
+
+    int getAltitude() {
+        return this.altitude;
+    }
+
+    void setAltitude(int alt) {
+        this.altitude = alt;
+    }
+}

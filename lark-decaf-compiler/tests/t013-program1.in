@@ -1,0 +1,6 @@
+int a;
+a = 42;
+
+int main() {
+    Print("Global variable 'a' has the answer to the universe: ", a);
+}

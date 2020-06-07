@@ -1,0 +1,5 @@
+class A {}
+interface B {}
+class C {}
+interface D {}
+class E extends A implements B, D {}
