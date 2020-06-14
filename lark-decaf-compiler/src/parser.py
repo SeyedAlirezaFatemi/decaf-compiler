@@ -13,10 +13,7 @@ variable_decl: variable ";"
 
 variable: type IDENT
 
-type: "int"
-    | "double"
-    | "bool"
-    | "string"
+type: PRIM
     | IDENT
     | type "[]"
 
@@ -57,7 +54,7 @@ return_stmt: "return" (expr)? ";"
 
 break_stmt: "break" ";"
 
-print_stmt : "Print" "(" expr ("," expr)* ")" ";" 
+print_stmt : "Print" "(" expr ("," expr)* ")" ";"
 
 expr : l_value "=" expr
     | constant
@@ -101,10 +98,15 @@ constant: INTEGER
     | STRING
     | "null"
 
+PRIM: "int"
+    | "double"
+    | "bool"
+    | "string"
+
 BOOL.2: "true"
     | "false"
-DOUBLE.2: /(\d)+\.(\d)*((E|e)(\+|\-)?(\d)+)?/
-IDENT: /[a-zA-Z][a-zA-Z0-9_]*/
+DOUBLE.2: /(\d)+\.(\d)*(([Ee])(\+|\-)?(\d)+)?/
+IDENT: /[a-zA-Z][a-zA-Z0-9_]{0,30}/
 STRING : /"(?:[^\\"]|\\.)*"/
 HEXADECIMAL: /0[xX][0-9a-fA-F]+/
 DECIMAL: /[0-9]+/
