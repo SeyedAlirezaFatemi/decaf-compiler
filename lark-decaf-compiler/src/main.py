@@ -9,12 +9,41 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def main(argv):
-    tree = decaf_parser.parse("""
+    tree = decaf_parser.parse(
+        """
     int main(int a, int b, int c) {
     int a;
     }
     void hi() {
-    }""")
+    }
+    class Person implements Nameable {
+    string name;
+
+    void setName(string new_name) {
+        name = new_name;
+    }
+
+    string getName() {
+        return name;
+    }
+
+    int age;
+
+    void setAge(int new_age) {
+        age = new_age;
+    }
+
+    int getAge() {
+        return age;
+    }
+
+    void print() {
+        Print("Name: ", name, " Age: ", age);
+    }
+}
+class HELLO{}
+"""
+    )
     DecafTransformer().transform(tree)
     return
     inputfile = ""

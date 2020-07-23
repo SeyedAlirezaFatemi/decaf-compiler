@@ -2,33 +2,39 @@ from lark import Lark
 
 decaf_parser = Lark(
     grammar=r"""
-program: (decl)+
+program: (decl)+ -> finalize
 
-decl: variable_decl
-    | function_decl
-    | class_decl
-    | interface_decl
+decl: variable_decl -> pass_up_first_element
+    | function_decl -> pass_up_first_element
+    | class_decl -> pass_up_first_element
+    | interface_decl -> pass_up_first_element
 
 variable_decl: variable ";" -> new_variable
 
 variable: type IDENT -> variable_definition
 
-type: PRIM -> pass_up
-    | IDENT -> pass_up
-    | type "[]" -> pass_up
+type: PRIM -> pass_up_first_element
+    | IDENT -> pass_up_first_element
+    | type "[]" -> todo
 
 function_decl: type IDENT "(" formals ")" stmt_block -> new_function
     | "void" IDENT "(" formals ")" stmt_block -> new_void_function
 
-formals: variable ("," variable)* -> formal_parameters
-    | -> formal_parameters
+formals: variable ("," variable)* -> pass_up
+    | -> pass_up
 
-class_decl: "class" IDENT ("extends" IDENT)? ("implements" IDENT ("," IDENT)*)? "{" (field)* "}"
+class_decl: "class" IDENT extend_decl implement_decl "{" (field)* "}" -> new_class
 
-field: variable_decl
-    | function_decl
+extend_decl: "extends" IDENT -> pass_up_first_element
+    | -> pass_up
 
-interface_decl: "interface" IDENT "{" (prototype)* "}"
+implement_decl: "implements" IDENT ("," IDENT)* -> pass_up
+    | -> pass_up
+
+field: variable_decl -> pass_up_first_element
+    | function_decl -> pass_up_first_element
+
+interface_decl: "interface" IDENT "{" (prototype)* "}" -> new_interface
 
 prototype: type IDENT "(" formals ")" ";"
     | "void" IDENT "(" formals ")" ";"
