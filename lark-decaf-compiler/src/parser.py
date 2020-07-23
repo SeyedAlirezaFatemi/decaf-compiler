@@ -124,14 +124,3 @@ MULTILINE_COMMENT : /\/\*(\*(?!\/)|[^*])*\*\//
     start="program",
     parser="lalr",
 )
-
-text = """
-
-interface Flying {
-    void fly();
-    int getAltitude();
-    void setAltitude(int alt);
-}
-
-"""
-# print(decaf_parser.parse(text).pretty())

@@ -1,5 +1,10 @@
 import getopt
+import logging
 import sys
+
+from .decaf_transformer import DecafTransformer
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 def main(argv):
@@ -24,7 +29,8 @@ def main(argv):
         from .parser import decaf_parser
 
         try:
-            decaf_parser.parse(input_file.read())
+            tree = decaf_parser.parse(input_file.read())
+            DecafTransformer().transform(tree)
         except BaseException as e:
             # print(e)
             success = False
