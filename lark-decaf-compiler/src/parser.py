@@ -9,19 +9,19 @@ decl: variable_decl
     | class_decl
     | interface_decl
 
-variable_decl: variable ";" -> propagate_rule
+variable_decl: variable ";" -> new_variable
 
-variable: type IDENT -> new_variable
+variable: type IDENT -> variable_definition
 
-type: PRIM
-    | IDENT
-    | type "[]"
+type: PRIM -> pass_up
+    | IDENT -> pass_up
+    | type "[]" -> pass_up
 
 function_decl: type IDENT "(" formals ")" stmt_block -> new_function
     | "void" IDENT "(" formals ")" stmt_block -> new_void_function
 
 formals: variable ("," variable)* -> formal_parameters
-    |
+    | -> formal_parameters
 
 class_decl: "class" IDENT ("extends" IDENT)? ("implements" IDENT ("," IDENT)*)? "{" (field)* "}"
 
