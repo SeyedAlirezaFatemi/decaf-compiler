@@ -9,18 +9,18 @@ decl: variable_decl
     | class_decl
     | interface_decl
 
-variable_decl: variable ";"
+variable_decl: variable ";" -> propagate_rule
 
-variable: type IDENT
+variable: type IDENT -> new_variable
 
 type: PRIM
     | IDENT
     | type "[]"
 
-function_decl: type IDENT "(" formals ")" stmt_block
-    | "void" IDENT "(" formals ")" stmt_block
+function_decl: type IDENT "(" formals ")" stmt_block -> new_function
+    | "void" IDENT "(" formals ")" stmt_block -> new_void_function
 
-formals: variable ("," variable)*
+formals: variable ("," variable)* -> formal_parameters
     |
 
 class_decl: "class" IDENT ("extends" IDENT)? ("implements" IDENT ("," IDENT)*)? "{" (field)* "}"

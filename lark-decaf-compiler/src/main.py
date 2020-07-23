@@ -3,11 +3,20 @@ import logging
 import sys
 
 from .decaf_transformer import DecafTransformer
+from .parser import decaf_parser
 
 logging.basicConfig(level=logging.DEBUG)
 
 
 def main(argv):
+    tree = decaf_parser.parse("""
+    int main(int a, int b, int c) {
+    int a;
+    }
+    void hi() {
+    }""")
+    DecafTransformer().transform(tree)
+    return
     inputfile = ""
     outputfile = ""
     try:
@@ -26,7 +35,6 @@ def main(argv):
 
     success = True
     with open("tests/" + inputfile, "r") as input_file:
-        from .parser import decaf_parser
 
         try:
             tree = decaf_parser.parse(input_file.read())
