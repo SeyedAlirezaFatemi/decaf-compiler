@@ -66,3 +66,26 @@ class DecafTransformer(Transformer):
 
     def finalize(self, args):
         pass
+
+    def print(self, args):
+        """
+        Page A-49
+        Code is inside standard_library_functions.py
+        print_int 01 $a0 = integer
+        print_float 02 $f12 = float
+        print_double 03 $f12 = double
+        print_string 04 $a0 = string
+        """
+        # TODO: Call
+        pass
+
+    def read_integer(self, args):
+        """
+        Page A-49
+        Code is inside standard_library_functions.py
+        read_int 05 integer (in $v0)
+        """
+        # TODO: Call
+        pass
+
+

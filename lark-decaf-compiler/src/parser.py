@@ -60,7 +60,7 @@ return_stmt: "return" (expr)? ";"
 
 break_stmt: "break" ";"
 
-print_stmt : "Print" "(" expr ("," expr)* ")" ";"
+print_stmt : "Print" "(" expr ("," expr)* ")" ";" -> print
 
 expr : l_value "=" expr
     | constant
@@ -83,7 +83,7 @@ expr : l_value "=" expr
     | expr "&&" expr
     | expr "||" expr
     | "!" expr
-    | "ReadInteger" "(" ")"
+    | "ReadInteger" "(" ")" -> read_integer
     | "ReadLine" "(" ")"
     | "new" IDENT
     | "NewArray" "(" expr "," type ")"
