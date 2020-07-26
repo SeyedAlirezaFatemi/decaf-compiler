@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union, Any
+from typing import List, Union, Any, Optional
 
 from lark import Transformer, Tree, Token
 
@@ -89,3 +89,60 @@ class DecafTransformer(Transformer):
         pass
 
 
+class SymbolTable:
+    pass
+
+
+class Scope:
+    pass
+
+
+class CodeGenerator:
+    def generate_code(self, scope: Scope) -> str:
+        pass
+
+
+class Expression(CodeGenerator):
+    pass
+
+
+class Statement(CodeGenerator):
+    pass
+
+
+class IfStatement(Statement):
+    condition_expression: Expression
+    true_statement: Statement
+    false_statement: Statement
+
+
+class WhileStatement(Statement):
+    condition_expression: Expression
+    true_statement: Statement
+    false_statement: Statement
+
+
+class ReturnStatement(Statement):
+    return_expression: Optional[Expression]
+
+
+class PrintStatement(Statement):
+    expressions: List[Expression]
+
+
+class ForStatement(Statement):
+    initialization_expression: Optional[Expression]
+    condition_expression: Expression
+    update_expression: Optional[Expression]
+    statement: Statement
+
+    def generate_code(self, scope) -> str:
+        code = "_L2:\n"
+        code += self.initialization_expression.generate_code(scope)
+        code += self.condition_expression.generate_code(scope)
+        code += self.statement.generate_code(scope)
+        return code
+
+
+class BreakStatement(Statement):
+    pass
