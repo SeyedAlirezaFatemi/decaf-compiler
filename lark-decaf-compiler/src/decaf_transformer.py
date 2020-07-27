@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union, Any, Optional
+from typing import List, Union, Any, Optional, Dict
 
 from lark import Transformer, Tree, Token
 
@@ -89,37 +89,120 @@ class DecafTransformer(Transformer):
         pass
 
 
-class SymbolTable:
+
+class Node:
     pass
 
+class Declaration(Node):
+    identifier: Identifier
+
+
+class Identifier(Node):
+    name: str
+    declrations: Declaration
 
 class Scope:
+    name_declaration_map: Dict[str, Declaration]
+    parent_scope: Optional[Scope]
+    parent_class_name: Opional[str]
+    owner_class_name: Opional[str]
+
+    def __init__(self, parent_scope: Optional[Scope]= None, parent_class_name: Optional[str] = None, owner_class_name: Optional[str]):
+        self.name_declaration_map = dict()
+        self.parent_scope = parent_scope
+        self.parent_class_name = parent_class_name
+        self.owner_class_name = owner_class_name
+    
+    def lookup(self, name):
+        if name in self.name_declaration_map:
+            return self.name_declaration_map[name]
+        if self.parent_scope is None:
+            print("Error")
+        else:
+            return self.parent_scope.lookup(name)
+
+    def add_declaration(self, decleration: Declaration):
+        self.name_declaration_map[decleration.identifier.name] = decleration
+
+
+class SymbolTable:
+    global_scope: Scope
+    current_scope: Scope
+
+    def __init__(self):
+        # init global scope
+        self.global_scope = Scope()
+        self.current_scope = self.global_scope
+    
+    def enter_new_scope(self, owner_class_name: Optional[str] = None):
+        new_scope = Scope(self.current_scope, owner_class_name=owner_class_name)
+        self.current_scope = new_scope
+
+    def exit_current_scope(self):
+        prev_scope = self.current_scope
+        self.current_scope = self.current_scope.parent_scope
+        del prev_scope
+
+    def add_declaration_to_global_scope(self, decleration: Declaration):
+        self.global_scope.add_declaration(decleration)
+        
+    def add_declaration_to_current_scope(self, decleration: Declaration):
+        self.current_scope.add_declaration(decleration)
+
+
+class Type(Node):
+    name: str
+
+class NamedType(Node):
+    identifier: Identifier
+
+class ArrayType(Type):
+    elementType: Type
+
+class VariableDecleration(Declaration):
+    variable_type: Type
+    is_global: bool
+    class_member_offset: int
+
+class ClassDecleration(Declaration):
+    members: List[Declaration]
+    extends: NamedType
+    intstance_size: int
+    vtable_size: int
+    variable_members: List[VariableDecleration]
+    methods: List[FunctionDecleratoin]
+
+class FunctionDecleratoin(Declaration):
+    formal_parameters: List[VariableDecleration]
+    return_type: Type
+    body: Statement
+
+class Program(Node):
+    declarations: List[Declaration]
+
+
+class Expression(Node):
     pass
 
 
-class CodeGenerator:
-    def generate_code(self, scope: Scope) -> str:
-        pass
-
-
-class Expression(CodeGenerator):
+class Statement(Node):
     pass
 
-
-class Statement(CodeGenerator):
-    pass
+class StatementBlock(Statement):
+    variable_declarations: List[VariableDecleration]
+    statements: List[Statement]
 
 
 class IfStatement(Statement):
     condition_expression: Expression
-    true_statement: Statement
-    false_statement: Statement
+    body_statement: Statement
+    else_body_statement: Statement
 
 
 class WhileStatement(Statement):
     condition_expression: Expression
-    true_statement: Statement
-    false_statement: Statement
+    body_statement: Statement
+    end_label: str
 
 
 class ReturnStatement(Statement):
@@ -127,14 +210,15 @@ class ReturnStatement(Statement):
 
 
 class PrintStatement(Statement):
-    expressions: List[Expression]
+    args: List[Expression]
 
 
 class ForStatement(Statement):
     initialization_expression: Optional[Expression]
     condition_expression: Expression
     update_expression: Optional[Expression]
-    statement: Statement
+    body_statement: Statement
+    end_label: str
 
     def generate_code(self, scope) -> str:
         code = "_L2:\n"
