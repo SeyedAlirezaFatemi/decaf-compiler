@@ -111,11 +111,11 @@ l_value: identifier -> identifier_l_value
     | expr "." identifier -> member_access_l_value
     | expr "[" expr "]" -> array_access_l_value
 
-call: identifier "(" actuals ")"
-    | expr "." identifier "(" actuals ")"
+call: identifier "(" actuals ")" -> function_call
+    | expr "." identifier "(" actuals ")" -> method_call
 
-actuals:  expr ("," expr)*
-    |
+actuals:  expr ("," expr)* -> pass_up
+    | -> pass_up
 
 identifier: IDENT -> identifier
 new_identifier: IDENT -> new_identifier

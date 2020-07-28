@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from .Identifier import Identifier
 from .Node import Node
@@ -88,6 +88,24 @@ class ArrayAccessLValue(LValue):
 class Assignment(Expression):
     l_value: LValue
     expression: Expression
+
+
+@dataclass
+class Call(Expression):
+    pass
+
+
+@dataclass
+class FunctionCall(Call):
+    function_identifier: Identifier
+    actual_parameters: List[Expression]
+
+
+@dataclass
+class MethodCall(Call):
+    class_expression: Expression
+    method_identifier: Identifier
+    actual_parameters: List[Expression]
 
 
 @dataclass

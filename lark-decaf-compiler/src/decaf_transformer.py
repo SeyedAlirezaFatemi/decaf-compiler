@@ -10,7 +10,13 @@ from .models.Expression import (
     ReadLine,
     ThisExpression,
     UnaryExpression,
-    BinaryExpression, IdentifierLValue, MemberAccessLValue, ArrayAccessLValue, Assignment,
+    BinaryExpression,
+    IdentifierLValue,
+    MemberAccessLValue,
+    ArrayAccessLValue,
+    Assignment,
+    FunctionCall,
+    MethodCall,
 )
 from .models.Identifier import Identifier
 from .models.Statement import (
@@ -162,6 +168,14 @@ class DecafTransformer(Transformer):
     def assignment(self, args):
         l_value, expression = args
         return Assignment(l_value, expression)
+
+    def function_call(self, args):
+        function_identifier, actual_parameters = args
+        return FunctionCall(function_identifier, actual_parameters)
+
+    def method_call(self, args):
+        class_expression, method_identifier, actual_parameters = args
+        return MethodCall(class_expression, method_identifier, actual_parameters)
 
     def read_integer(self, args):
         """
