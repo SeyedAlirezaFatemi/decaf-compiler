@@ -1,13 +1,3 @@
-from dataclasses import dataclass
-
-from .models.Node import Node
-
-
-@dataclass
-class ReadInteger(Node):
-    pass
-
-
 code = """
 _PrintInt:
         subu    $sp, $sp, 8

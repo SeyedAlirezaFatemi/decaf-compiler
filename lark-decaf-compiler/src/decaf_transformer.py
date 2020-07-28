@@ -1,10 +1,16 @@
 from lark import Transformer
 
-from .standard_library_functions import ReadInteger
 from .models.Declaration import (
     FunctionDeclaration,
     VariableDeclaration,
     ClassDeclaration,
+)
+from .models.Expression import (
+    ReadInteger,
+    ReadLine,
+    ThisExpression,
+    UnaryExpression,
+    BinaryExpression,
 )
 from .models.Identifier import Identifier
 from .models.Statement import (
@@ -130,6 +136,17 @@ class DecafTransformer(Transformer):
         """
         return PrintStatement(args)
 
+    def this_expression(self, args):
+        return ThisExpression()
+
+    def unary_operation(self, args):
+        operator, expression = args
+        return UnaryExpression(operator, expression)
+
+    def binary_operation(self, args):
+        left_expression, operator, right_expression = args
+        return BinaryExpression(operator, left_expression, right_expression)
+
     def read_integer(self, args):
         """
         Page A-49
@@ -137,6 +154,9 @@ class DecafTransformer(Transformer):
         read_int 05 integer (in $v0)
         """
         return ReadInteger()
+
+    def read_line(self, args):
+        return ReadLine()
 
     def finalize(self, args):
         pass

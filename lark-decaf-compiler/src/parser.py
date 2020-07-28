@@ -69,40 +69,42 @@ print_stmt : "Print" "(" expr ("," expr)* ")" ";" -> print_statement
 expr : assignment
     | constant
     | l_value
-    | "this"
+    | "this" -> this_expression
     | call
-    | "(" expr ")"
-    | minus
-    | not
-    | multiplication
-    | division
-    | modulo
-    | addition
-    | subtraction
-    | inequality
-    | equality
-    | logical_and
-    | logical_or
+    | "(" expr ")" -> pass_up_first_element
+    | minus -> pass_up_first_element
+    | not -> pass_up_first_element
+    | multiplication -> pass_up_first_element
+    | division -> pass_up_first_element
+    | modulo -> pass_up_first_element
+    | addition -> pass_up_first_element
+    | subtraction -> pass_up_first_element
+    | inequality -> pass_up_first_element
+    | equality -> pass_up_first_element
+    | logical_and -> pass_up_first_element
+    | logical_or -> pass_up_first_element
     | "ReadInteger" "(" ")" -> read_integer
-    | "ReadLine" "(" ")"
-    | "new" identifier
-    | "NewArray" "(" expr "," type ")"
+    | "ReadLine" "(" ")" -> read_line
+    | "new" identifier -> initiate_class
+    | "NewArray" "(" expr "," type ")" -> initiate_array
 
-minus.8: "-" expr -> minus
-not.8: "!" expr -> not 
-multiplication.7: expr "*" expr -> multiplication
-division.7: expr "/" expr -> division
-modulo.7: expr "%" expr -> modulo
-addition.6: expr "+" expr -> addition 
-subtraction.6: expr "-" expr -> subtraction
-inequality.5: expr "<=" expr -> inequality 
-    | expr "<" expr -> inequality
-    | expr ">=" expr -> inequality
-    | expr ">" expr -> inequality
-equality.5: expr "==" expr -> equality
-    | expr "!=" expr -> equality
-logical_and.4: expr "&&" expr -> logical_and 
-logical_or.4: expr "||" expr -> logical_or
+minus.8: "-" expr -> unary_operation
+not.8: "!" expr -> unary_operation
+
+multiplication.7: expr "*" expr -> binary_operation
+division.7: expr "/" expr -> binary_operation
+modulo.7: expr "%" expr -> binary_operation
+addition.6: expr "+" expr -> binary_operation
+subtraction.6: expr "-" expr -> binary_operation
+inequality.5: expr "<=" expr -> binary_operation
+    | expr "<" expr -> binary_operation
+    | expr ">=" expr -> binary_operation
+    | expr ">" expr -> binary_operation
+equality.5: expr "==" expr -> binary_operation
+    | expr "!=" expr -> binary_operation
+logical_and.4: expr "&&" expr -> binary_operation 
+logical_or.4: expr "||" expr -> binary_operation
+
 assignment: l_value "=" expr -> assignment
 
 l_value: identifier
