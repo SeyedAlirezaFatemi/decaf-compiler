@@ -1,5 +1,6 @@
 from lark import Transformer
 
+from .standard_library_functions import ReadInteger
 from .models.Declaration import (
     FunctionDeclaration,
     VariableDeclaration,
@@ -12,6 +13,7 @@ from .models.Statement import (
     IfStatement,
     WhileStatement,
     ForStatement,
+    PrintStatement,
 )
 from .models.Type import Type
 
@@ -41,7 +43,6 @@ class DecafTransformer(Transformer):
         return Identifier(identifier_name, new=False)
 
     def new_variable(self, args):
-        print("new_variable")
         variable_declaration: VariableDeclaration = args[0]
         variable_declaration.is_function_parameter = (
             False
@@ -49,15 +50,12 @@ class DecafTransformer(Transformer):
         return variable_declaration
 
     def variable_definition(self, args):
-        print("variable_definition", args)
         variable_type, variable_identifier = args
         variable_declaration = VariableDeclaration(variable_identifier, variable_type)
         variable_identifier.declaration = variable_declaration
         return variable_declaration
 
     def new_function(self, args):
-        print("new_function")
-        print(args)
         return_type, function_identifier, function_parameters, function_body = args
         function_declaration = FunctionDeclaration(
             function_identifier, function_parameters, return_type, function_body
@@ -66,8 +64,6 @@ class DecafTransformer(Transformer):
         return function_declaration
 
     def new_void_function(self, args):
-        print("new_void_function")
-        print(args)
         function_identifier, function_parameters, function_body = args
         function_declaration = FunctionDeclaration(
             function_identifier, function_parameters, Type("void"), function_body
@@ -123,10 +119,7 @@ class DecafTransformer(Transformer):
         return_expression = args[0]
         return ReturnStatement(return_expression)
 
-    def finalize(self, args):
-        pass
-
-    def print(self, args):
+    def print_statement(self, args):
         """
         Page A-49
         Code is inside standard_library_functions.py
@@ -135,8 +128,7 @@ class DecafTransformer(Transformer):
         print_double 03 $f12 = double
         print_string 04 $a0 = string
         """
-        # TODO: Call
-        pass
+        return PrintStatement(args)
 
     def read_integer(self, args):
         """
@@ -144,5 +136,7 @@ class DecafTransformer(Transformer):
         Code is inside standard_library_functions.py
         read_int 05 integer (in $v0)
         """
-        # TODO: Call
+        return ReadInteger()
+
+    def finalize(self, args):
         pass

@@ -64,7 +64,7 @@ optional_expression: (expr)? -> pass_up_first_element
 
 break_stmt: "break" ";" -> break_statement
 
-print_stmt : "Print" "(" expr ("," expr)* ")" ";" -> print
+print_stmt : "Print" "(" expr ("," expr)* ")" ";" -> print_statement
 
 expr : assignment
     | constant
