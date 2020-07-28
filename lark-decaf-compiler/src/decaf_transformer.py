@@ -1,6 +1,10 @@
 from lark import Transformer
 
-from .models.Declaration import FunctionDeclaration, VariableDeclaration
+from .models.Declaration import (
+    FunctionDeclaration,
+    VariableDeclaration,
+    ClassDeclaration,
+)
 from .models.Identifier import Identifier
 from .models.Statement import BreakStatement, ReturnStatement
 from .models.Type import Type
@@ -66,7 +70,20 @@ class DecafTransformer(Transformer):
     def new_class(self, args):
         print("new_class")
         print(args)
-        class_name = args[0]
+        class_identifier, extend_identifier, implement_identifiers, fields_declarations = (
+            args
+        )
+        # Extract these from field declarations
+        variable_declarations = []
+        function_declarations = []
+        class_declaration = ClassDeclaration(
+            class_identifier,
+            extend_identifier,
+            variable_declarations,
+            function_declarations,
+        )
+        class_identifier.declaration = class_declaration
+        return class_declaration
 
     def break_statement(self, args):
         return BreakStatement()

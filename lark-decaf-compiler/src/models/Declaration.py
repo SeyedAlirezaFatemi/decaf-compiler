@@ -34,9 +34,8 @@ class FunctionDeclaration(Declaration):
 
 @dataclass
 class ClassDeclaration(Declaration):
-    members: List[Declaration]
-    extends: NamedType
-    instance_size: int
-    vtable_size: int
-    variable_members: List[VariableDeclaration]
+    extends: Identifier
+    variables: List[VariableDeclaration]
     methods: List[FunctionDeclaration]
+    instance_size: int = 0
+    vtable_size: int = 0

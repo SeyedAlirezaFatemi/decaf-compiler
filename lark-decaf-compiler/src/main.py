@@ -48,10 +48,7 @@ class HELLO{}
     )
     tree = decaf_parser.parse(
         """
-    int main(int a, int b, int c) {
-    int a;
-    return 1;
-    }
+    class HELLO{}
 """
     )
     DecafTransformer().transform(tree)

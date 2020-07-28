@@ -23,13 +23,15 @@ function_decl: type new_identifier "(" formals ")" stmt_block -> new_function
 formals: variable ("," variable)* -> pass_up
     | -> pass_up
 
-class_decl: "class" new_identifier extend_decl implement_decl "{" (field)* "}" -> new_class
+class_decl: "class" new_identifier extend_decl implement_decl "{" fields_decl "}" -> new_class
 
 extend_decl: "extends" identifier -> pass_up_first_element
     | -> pass_up
 
 implement_decl: "implements" identifier ("," identifier)* -> pass_up
     | -> pass_up
+
+fields_decl: (field)* -> pass_up
 
 field: variable_decl -> pass_up_first_element
     | function_decl -> pass_up_first_element
