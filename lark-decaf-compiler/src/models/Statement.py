@@ -18,6 +18,11 @@ class StatementBlock(Statement):
 
 
 @dataclass
+class OptionalExpressionStatement(Statement):
+    expression: Optional[Expression] = None
+
+
+@dataclass
 class IfStatement(Statement):
     condition_expression: Expression
     body_statement: Statement

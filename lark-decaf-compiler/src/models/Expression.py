@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class Operator(Enum):
     MINUS = "-"
-    PLUS = "+"
+    ADDITION = "+"
     NOT = "!"
     DIVISION = "/"
     MULTIPLICATION = "*"

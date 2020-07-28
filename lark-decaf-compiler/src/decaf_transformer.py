@@ -17,6 +17,7 @@ from .models.Expression import (
     Assignment,
     FunctionCall,
     MethodCall,
+    Operator,
 )
 from .models.Identifier import Identifier
 from .models.Statement import (
@@ -26,17 +27,19 @@ from .models.Statement import (
     WhileStatement,
     ForStatement,
     PrintStatement,
+    StatementBlock,
+    OptionalExpressionStatement,
+    Statement,
 )
 from .models.Type import Type
 
 variable_size = {"int": 4, "string": 100, "double": 8, "bool": 4}
+stack_pointer = 0x7FFFFFFF
 
 
 class DecafTransformer(Transformer):
     def __init__(self):
         super().__init__()
-        self.variable_map = dict()
-        self.stack_pointer = 0x7FFFFFFF
 
     def pass_up(self, args):
         return args
@@ -101,6 +104,18 @@ class DecafTransformer(Transformer):
         class_identifier.declaration = class_declaration
         return class_declaration
 
+    def statement_block(self, args):
+        variable_declarations, statements = [], []
+        for arg in args:
+            if type(arg) == Statement:
+                statements.append(arg)
+            else:
+                variable_declarations.append(arg)
+        return StatementBlock(variable_declarations, statements)
+
+    def optional_expresion_statement(self, args):
+        return OptionalExpressionStatement(args[0])
+
     def if_statement(self, args):
         else_body_statement = None
         if len(args) == 3:
@@ -145,13 +160,67 @@ class DecafTransformer(Transformer):
     def this_expression(self, args):
         return ThisExpression()
 
-    def unary_operation(self, args):
-        operator, expression = args
-        return UnaryExpression(operator, expression)
+    def minus_operation(self, args):
+        expression = args
+        return UnaryExpression(Operator.MINUS, expression)
 
-    def binary_operation(self, args):
-        left_expression, operator, right_expression = args
-        return BinaryExpression(operator, left_expression, right_expression)
+    def not_operation(self, args):
+        expression = args
+        return UnaryExpression(Operator.NOT, expression)
+
+    def multiplication_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(
+            Operator.MULTIPLICATION, left_expression, right_expression
+        )
+
+    def addition_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.ADDITION, left_expression, right_expression)
+
+    def subtraction_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.MINUS, left_expression, right_expression)
+
+    def modulo_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.MODULO, left_expression, right_expression)
+
+    def division_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.DIVISION, left_expression, right_expression)
+
+    def lt_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.LT, left_expression, right_expression)
+
+    def lte_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.LTE, left_expression, right_expression)
+
+    def gt_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.GT, left_expression, right_expression)
+
+    def gte_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.GTE, left_expression, right_expression)
+
+    def equals_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.EQUALS, left_expression, right_expression)
+
+    def not_equals_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.NOT_EQUALS, left_expression, right_expression)
+
+    def and_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.AND, left_expression, right_expression)
+
+    def or_operation(self, args):
+        left_expression, right_expression = args
+        return BinaryExpression(Operator.OR, left_expression, right_expression)
 
     def identifier_l_value(self, args):
         identifier = args[0]

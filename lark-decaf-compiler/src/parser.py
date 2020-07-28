@@ -41,9 +41,9 @@ interface_decl: "interface" new_identifier "{" (prototype)* "}"
 prototype: type new_identifier "(" formals ")" ";"
     | "void" new_identifier "(" formals ")" ";"
 
-stmt_block: "{" (variable_decl)* (stmt)* "}"
+stmt_block: "{" (variable_decl)* (stmt)* "}" -> statement_block
 
-stmt: (expr)? ";"
+stmt: optional_expression ";" -> optional_expresion_statement
     | if_stmt -> pass_up_first_element
     | while_stmt -> pass_up_first_element
     | for_stmt -> pass_up_first_element
@@ -88,22 +88,22 @@ expr : assignment -> pass_up_first_element
     | "new" identifier -> initiate_class
     | "NewArray" "(" expr "," type ")" -> initiate_array
 
-minus.8: "-" expr -> unary_operation
-not.8: "!" expr -> unary_operation
+minus.8: "-" expr -> minus_operation
+not.8: "!" expr -> not_operation
 
-multiplication.7: expr "*" expr -> binary_operation
-division.7: expr "/" expr -> binary_operation
-modulo.7: expr "%" expr -> binary_operation
-addition.6: expr "+" expr -> binary_operation
-subtraction.6: expr "-" expr -> binary_operation
-inequality.5: expr "<=" expr -> binary_operation
-    | expr "<" expr -> binary_operation
-    | expr ">=" expr -> binary_operation
-    | expr ">" expr -> binary_operation
-equality.5: expr "==" expr -> binary_operation
-    | expr "!=" expr -> binary_operation
-logical_and.4: expr "&&" expr -> binary_operation 
-logical_or.4: expr "||" expr -> binary_operation
+multiplication.7: expr "*" expr -> multiplication_operation
+division.7: expr "/" expr -> division_operation
+modulo.7: expr "%" expr -> modulo_operation
+addition.6: expr "+" expr -> addition_operation
+subtraction.6: expr "-" expr -> subtraction_operation
+inequality.5: expr "<=" expr -> lte_operation
+    | expr "<" expr -> lt_operation
+    | expr ">=" expr -> gte_operation
+    | expr ">" expr -> gt_operation
+equality.5: expr "==" expr -> equals_operation
+    | expr "!=" expr -> not_equals_operation
+logical_and.4: expr "&&" expr -> and_operation 
+logical_or.4: expr "||" expr -> or_operation
 
 assignment: l_value "=" expr -> assignment
 
@@ -120,11 +120,11 @@ actuals:  expr ("," expr)* -> pass_up
 identifier: IDENT -> identifier
 new_identifier: IDENT -> new_identifier
 
-constant: INTEGER
-    | DOUBLE
-    | BOOL
-    | STRING
-    | "null"
+constant: INTEGER -> pass_up_first_element
+    | DOUBLE -> pass_up_first_element
+    | BOOL -> pass_up_first_element
+    | STRING -> pass_up_first_element
+    | "null" -> pass_up_first_element
 
 PRIM: "int"
     | "double"

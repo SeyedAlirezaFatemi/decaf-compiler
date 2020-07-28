@@ -51,6 +51,8 @@ class HELLO{}
     //class HELLO{}
     int getAge() {
         a.a();
+        for (;x<0;){
+        }
         //Print(1, 2, 3);
         //return;
     }
