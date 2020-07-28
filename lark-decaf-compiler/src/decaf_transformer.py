@@ -10,7 +10,7 @@ from .models.Expression import (
     ReadLine,
     ThisExpression,
     UnaryExpression,
-    BinaryExpression,
+    BinaryExpression, IdentifierLValue, MemberAccessLValue, ArrayAccessLValue, Assignment,
 )
 from .models.Identifier import Identifier
 from .models.Statement import (
@@ -147,6 +147,22 @@ class DecafTransformer(Transformer):
         left_expression, operator, right_expression = args
         return BinaryExpression(operator, left_expression, right_expression)
 
+    def identifier_l_value(self, args):
+        identifier = args[0]
+        return IdentifierLValue(identifier)
+
+    def member_access_l_value(self, args):
+        expression, identifier = args
+        return MemberAccessLValue(expression, identifier)
+
+    def array_access_l_value(self, args):
+        array_expression, index_expression = args
+        return ArrayAccessLValue(array_expression, index_expression)
+
+    def assignment(self, args):
+        l_value, expression = args
+        return Assignment(l_value, expression)
+
     def read_integer(self, args):
         """
         Page A-49
@@ -159,4 +175,5 @@ class DecafTransformer(Transformer):
         return ReadLine()
 
     def finalize(self, args):
+        print(args)
         pass

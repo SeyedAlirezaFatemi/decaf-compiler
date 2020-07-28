@@ -66,11 +66,11 @@ break_stmt: "break" ";" -> break_statement
 
 print_stmt : "Print" "(" expr ("," expr)* ")" ";" -> print_statement
 
-expr : assignment
-    | constant
-    | l_value
+expr : assignment -> pass_up_first_element
+    | constant -> pass_up_first_element
+    | l_value -> pass_up_first_element
     | "this" -> this_expression
-    | call
+    | call -> pass_up_first_element
     | "(" expr ")" -> pass_up_first_element
     | minus -> pass_up_first_element
     | not -> pass_up_first_element
@@ -107,9 +107,9 @@ logical_or.4: expr "||" expr -> binary_operation
 
 assignment: l_value "=" expr -> assignment
 
-l_value: identifier
-    | expr "." identifier
-    | expr "[" expr "]"
+l_value: identifier -> identifier_l_value
+    | expr "." identifier -> member_access_l_value
+    | expr "[" expr "]" -> array_access_l_value
 
 call: identifier "(" actuals ")"
     | expr "." identifier "(" actuals ")"

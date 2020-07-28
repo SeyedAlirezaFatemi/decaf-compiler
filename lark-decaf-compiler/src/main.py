@@ -50,6 +50,7 @@ class HELLO{}
         """
     class HELLO{}
     int getAge() {
+        a.a = b;
         Print(1, 2, 3);
         return;
     }

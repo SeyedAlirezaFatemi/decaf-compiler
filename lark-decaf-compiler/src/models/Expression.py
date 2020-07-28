@@ -63,6 +63,34 @@ class ReadLine(Expression):
 
 
 @dataclass
+class LValue(Expression):
+    pass
+
+
+@dataclass
+class IdentifierLValue(LValue):
+    identifier: Identifier
+
+
+@dataclass
+class MemberAccessLValue(LValue):
+    expression: Expression
+    identifier: Identifier
+
+
+@dataclass
+class ArrayAccessLValue(LValue):
+    array_expression: Expression
+    index_expression: Expression
+
+
+@dataclass
+class Assignment(Expression):
+    l_value: LValue
+    expression: Expression
+
+
+@dataclass
 class InitiateClass(Expression):
     class_identifier: Identifier
 
