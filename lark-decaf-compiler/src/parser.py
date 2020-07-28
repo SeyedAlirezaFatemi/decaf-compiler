@@ -11,19 +11,19 @@ decl: variable_decl -> pass_up_first_element
 
 variable_decl: variable ";" -> new_variable
 
-variable: type identifier -> variable_definition
+variable: type new_identifier -> variable_definition
 
 type: PRIM -> pass_up_first_element
     | identifier -> pass_up_first_element
     | type "[]" -> todo
 
-function_decl: type identifier "(" formals ")" stmt_block -> new_function
-    | "void" identifier "(" formals ")" stmt_block -> new_void_function
+function_decl: type new_identifier "(" formals ")" stmt_block -> new_function
+    | "void" new_identifier "(" formals ")" stmt_block -> new_void_function
 
 formals: variable ("," variable)* -> pass_up
     | -> pass_up
 
-class_decl: "class" identifier extend_decl implement_decl "{" (field)* "}" -> new_class
+class_decl: "class" new_identifier extend_decl implement_decl "{" (field)* "}" -> new_class
 
 extend_decl: "extends" identifier -> pass_up_first_element
     | -> pass_up
@@ -34,10 +34,10 @@ implement_decl: "implements" identifier ("," identifier)* -> pass_up
 field: variable_decl -> pass_up_first_element
     | function_decl -> pass_up_first_element
 
-interface_decl: "interface" identifier "{" (prototype)* "}" -> new_interface
+interface_decl: "interface" new_identifier "{" (prototype)* "}" -> new_interface
 
-prototype: type identifier "(" formals ")" ";"
-    | "void" identifier "(" formals ")" ";"
+prototype: type new_identifier "(" formals ")" ";"
+    | "void" new_identifier "(" formals ")" ";"
 
 stmt_block: "{" (variable_decl)* (stmt)* "}"
 
@@ -114,6 +114,7 @@ actuals:  expr ("," expr)*
     |
 
 identifier: IDENT -> identifier
+new_identifier: IDENT -> new_identifier
 
 constant: INTEGER
     | DOUBLE

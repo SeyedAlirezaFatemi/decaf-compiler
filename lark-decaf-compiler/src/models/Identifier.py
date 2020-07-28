@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Optional
 
 from .Node import Node
 
@@ -8,6 +9,8 @@ if TYPE_CHECKING:
     from .Declaration import Declaration
 
 
+@dataclass
 class Identifier(Node):
     name: str
-    declarations: Declaration
+    declaration: Optional[Declaration] = None
+    new: bool = False

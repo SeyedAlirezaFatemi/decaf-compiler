@@ -1,9 +1,8 @@
-from typing import List, Union
-
-from lark import Transformer, Tree, Token
+from lark import Transformer
 
 from .models.Declaration import FunctionDeclaration, VariableDeclaration
-from .models.Statement import BreakStatement
+from .models.Identifier import Identifier
+from .models.Statement import BreakStatement, ReturnStatement
 from .models.Type import Type
 
 variable_size = {"int": 4, "string": 100, "double": 8, "bool": 4}
@@ -21,32 +20,48 @@ class DecafTransformer(Transformer):
     def pass_up_first_element(self, args):
         return args[0]
 
+    def new_identifier(self, args):
+        identifier_name = args[0]
+        return Identifier(identifier_name, new=True)
+
+    def identifier(self, args):
+        identifier_name = args[0]
+        return Identifier(identifier_name, new=False)
+
     def new_variable(self, args):
         print("new_variable")
         variable_declaration: VariableDeclaration = args[0]
-        variable_declaration.is_function_parameter = False
+        variable_declaration.is_function_parameter = (
+            False
+        )  # Still may be global or class member
         return variable_declaration
 
     def variable_definition(self, args):
         print("variable_definition", args)
         variable_type, variable_identifier = args
-        return VariableDeclaration(variable_identifier, variable_type)
+        variable_declaration = VariableDeclaration(variable_identifier, variable_type)
+        variable_identifier.declaration = variable_declaration
+        return variable_declaration
 
-    def new_function(self, args: List[Union[Tree, Token]]):
+    def new_function(self, args):
         print("new_function")
         print(args)
         return_type, function_identifier, function_parameters, function_body = args
-        return FunctionDeclaration(
+        function_declaration = FunctionDeclaration(
             function_identifier, function_parameters, return_type, function_body
         )
+        function_identifier.declaration = function_declaration
+        return function_declaration
 
     def new_void_function(self, args):
         print("new_void_function")
         print(args)
         function_identifier, function_parameters, function_body = args
-        return FunctionDeclaration(
+        function_declaration = FunctionDeclaration(
             function_identifier, function_parameters, Type("void"), function_body
         )
+        function_identifier.declaration = function_declaration
+        return function_declaration
 
     def new_class(self, args):
         print("new_class")
@@ -57,8 +72,8 @@ class DecafTransformer(Transformer):
         return BreakStatement()
 
     def return_statement(self, args):
-        print("Return")
-        print(args)
+        return_expression = args[0]
+        return ReturnStatement(return_expression)
 
     def finalize(self, args):
         pass
