@@ -49,6 +49,10 @@ class HELLO{}
     tree = decaf_parser.parse(
         """
     class HELLO{}
+    int getAge() {
+        return;
+    }
+    
 """
     )
     DecafTransformer().transform(tree)

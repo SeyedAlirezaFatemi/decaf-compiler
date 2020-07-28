@@ -36,7 +36,7 @@ fields_decl: (field)* -> pass_up
 field: variable_decl -> pass_up_first_element
     | function_decl -> pass_up_first_element
 
-interface_decl: "interface" new_identifier "{" (prototype)* "}" -> new_interface
+interface_decl: "interface" new_identifier "{" (prototype)* "}"
 
 prototype: type new_identifier "(" formals ")" ";"
     | "void" new_identifier "(" formals ")" ";"
@@ -44,19 +44,19 @@ prototype: type new_identifier "(" formals ")" ";"
 stmt_block: "{" (variable_decl)* (stmt)* "}"
 
 stmt: (expr)? ";"
-    | if_stmt
-    | while_stmt
-    | for_stmt
-    | break_stmt
-    | return_stmt
-    | print_stmt
-    | stmt_block
+    | if_stmt -> pass_up_first_element
+    | while_stmt -> pass_up_first_element
+    | for_stmt -> pass_up_first_element
+    | break_stmt -> pass_up_first_element
+    | return_stmt -> pass_up_first_element
+    | print_stmt -> pass_up_first_element
+    | stmt_block -> pass_up_first_element
 
-if_stmt: "if" "(" expr ")" stmt ("else" stmt)?
+if_stmt: "if" "(" expr ")" stmt ("else" stmt)? -> if_statement
 
-while_stmt: "while" "(" expr ")" stmt
+while_stmt: "while" "(" expr ")" stmt -> while_statement
 
-for_stmt: "for" "(" optional_expression ";" expr ";" optional_expression ")" stmt
+for_stmt: "for" "(" optional_expression ";" expr ";" optional_expression ")" stmt -> for_statement
 
 return_stmt: "return" optional_expression ";" -> return_statement
 

@@ -21,14 +21,14 @@ class StatementBlock(Statement):
 class IfStatement(Statement):
     condition_expression: Expression
     body_statement: Statement
-    else_body_statement: Statement
+    else_body_statement: Optional[Statement] = None
 
 
 @dataclass
 class WhileStatement(Statement):
     condition_expression: Expression
     body_statement: Statement
-    end_label: str
+    end_label: str = "UNSPECIFIED"
 
 
 @dataclass
@@ -47,7 +47,7 @@ class ForStatement(Statement):
     condition_expression: Expression
     update_expression: Optional[Expression]
     body_statement: Statement
-    end_label: str
+    end_label: str = "UNSPECIFIED"
 
     def generate_code(self, scope) -> str:
         code = "_L2:\n"

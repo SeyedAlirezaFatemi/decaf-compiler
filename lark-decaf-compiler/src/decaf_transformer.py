@@ -6,7 +6,13 @@ from .models.Declaration import (
     ClassDeclaration,
 )
 from .models.Identifier import Identifier
-from .models.Statement import BreakStatement, ReturnStatement
+from .models.Statement import (
+    BreakStatement,
+    ReturnStatement,
+    IfStatement,
+    WhileStatement,
+    ForStatement,
+)
 from .models.Type import Type
 
 variable_size = {"int": 4, "string": 100, "double": 8, "bool": 4}
@@ -22,6 +28,8 @@ class DecafTransformer(Transformer):
         return args
 
     def pass_up_first_element(self, args):
+        if len(args) == 0:
+            return None
         return args[0]
 
     def new_identifier(self, args):
@@ -84,6 +92,29 @@ class DecafTransformer(Transformer):
         )
         class_identifier.declaration = class_declaration
         return class_declaration
+
+    def if_statement(self, args):
+        else_body_statement = None
+        if len(args) == 3:
+            condition_expression, body_statement, else_body_statement = args
+        else:
+            condition_expression, body_statement = args
+        return IfStatement(condition_expression, body_statement, else_body_statement)
+
+    def while_statement(self, args):
+        condition_expression, body_statement = args
+        return WhileStatement(condition_expression, body_statement)
+
+    def for_statement(self, args):
+        initialization_expression, condition_expression, update_expression, body_statement = (
+            args
+        )
+        return ForStatement(
+            initialization_expression,
+            condition_expression,
+            update_expression,
+            body_statement,
+        )
 
     def break_statement(self, args):
         return BreakStatement()
