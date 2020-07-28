@@ -76,6 +76,7 @@ class DecafTransformer(Transformer):
             function_identifier, function_parameters, return_type, function_body
         )
         function_identifier.declaration = function_declaration
+        function_identifier.new = True
         return function_declaration
 
     def new_void_function(self, args):
@@ -84,24 +85,36 @@ class DecafTransformer(Transformer):
             function_identifier, function_parameters, Type("void"), function_body
         )
         function_identifier.declaration = function_declaration
+        function_identifier.new = True
         return function_declaration
 
     def new_class(self, args):
-        print("new_class")
-        print(args)
         class_identifier, extend_identifier, implement_identifiers, fields_declarations = (
             args
         )
         # Extract these from field declarations
         variable_declarations = []
-        function_declarations = []
+        method_declarations = []
+        class_member_offset = 0
+        for field in fields_declarations:
+            if type(field) == VariableDeclaration:
+                variable_declarations.append(field)
+                field.is_class_member = True
+                field.class_member_offset = class_member_offset
+                class_member_offset += 0  # Variable size
+            else:
+                method_declarations.append(field)
+                field.is_method = True
         class_declaration = ClassDeclaration(
             class_identifier,
             extend_identifier,
             variable_declarations,
-            function_declarations,
+            method_declarations,
         )
+        for method in method_declarations:
+            method.owner_class = class_declaration
         class_identifier.declaration = class_declaration
+        class_identifier.new = True
         return class_declaration
 
     def statement_block(self, args):

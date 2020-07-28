@@ -48,14 +48,16 @@ class HELLO{}
     )
     tree = decaf_parser.parse(
         """
-    //class HELLO{}
-    int getAge() {
+    class HELLO{
+    int getAge() {}
+    }
+    /* int getAge() {
         a.a();
         for (;x<0;){
         }
         //Print(1, 2, 3);
         //return;
-    }
+    } */
     
 """
     )

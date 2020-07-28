@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 
 from .Identifier import Identifier
 from .Node import Node
 
 if TYPE_CHECKING:
     from .Statement import Statement
-    from .Type import Type, NamedType
+    from .Type import Type
 
 
 @dataclass
@@ -30,6 +30,8 @@ class FunctionDeclaration(Declaration):
     formal_parameters: List[VariableDeclaration]
     return_type: Type
     body: Statement
+    is_method: bool = False
+    owner_class: Optional[ClassDeclaration] = None
 
 
 @dataclass

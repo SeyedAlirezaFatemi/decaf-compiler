@@ -126,7 +126,7 @@ constant: INTEGER -> pass_up_first_element
     | STRING -> pass_up_first_element
     | "null" -> pass_up_first_element
 
-PRIM: "int"
+PRIM.2: "int"
     | "double"
     | "bool"
     | "string"
