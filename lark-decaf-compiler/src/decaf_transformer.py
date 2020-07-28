@@ -2,8 +2,9 @@ from typing import List, Union
 
 from lark import Transformer, Tree, Token
 
-from models.Declaration import FunctionDeclaration, VariableDeclaration
-from models.Type import Type
+from .models.Declaration import FunctionDeclaration, VariableDeclaration
+from .models.Statement import BreakStatement
+from .models.Type import Type
 
 variable_size = {"int": 4, "string": 100, "double": 8, "bool": 4}
 
@@ -28,7 +29,7 @@ class DecafTransformer(Transformer):
 
     def variable_definition(self, args):
         print("variable_definition", args)
-        variable_type, variable_identifier = args[0]
+        variable_type, variable_identifier = args
         return VariableDeclaration(variable_identifier, variable_type)
 
     def new_function(self, args: List[Union[Tree, Token]]):
@@ -52,8 +53,11 @@ class DecafTransformer(Transformer):
         print(args)
         class_name = args[0]
 
-    def new_interface(self, args):
-        print("new_interface")
+    def break_statement(self, args):
+        return BreakStatement()
+
+    def return_statement(self, args):
+        print("Return")
         print(args)
 
     def finalize(self, args):

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import getopt
 import logging
 import sys
@@ -42,6 +44,14 @@ def main(argv):
     }
 }
 class HELLO{}
+"""
+    )
+    tree = decaf_parser.parse(
+        """
+    int main(int a, int b, int c) {
+    int a;
+    return 1;
+    }
 """
     )
     DecafTransformer().transform(tree)

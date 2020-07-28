@@ -11,33 +11,33 @@ decl: variable_decl -> pass_up_first_element
 
 variable_decl: variable ";" -> new_variable
 
-variable: type IDENT -> variable_definition
+variable: type identifier -> variable_definition
 
 type: PRIM -> pass_up_first_element
-    | IDENT -> pass_up_first_element
+    | identifier -> pass_up_first_element
     | type "[]" -> todo
 
-function_decl: type IDENT "(" formals ")" stmt_block -> new_function
-    | "void" IDENT "(" formals ")" stmt_block -> new_void_function
+function_decl: type identifier "(" formals ")" stmt_block -> new_function
+    | "void" identifier "(" formals ")" stmt_block -> new_void_function
 
 formals: variable ("," variable)* -> pass_up
     | -> pass_up
 
-class_decl: "class" IDENT extend_decl implement_decl "{" (field)* "}" -> new_class
+class_decl: "class" identifier extend_decl implement_decl "{" (field)* "}" -> new_class
 
-extend_decl: "extends" IDENT -> pass_up_first_element
+extend_decl: "extends" identifier -> pass_up_first_element
     | -> pass_up
 
-implement_decl: "implements" IDENT ("," IDENT)* -> pass_up
+implement_decl: "implements" identifier ("," identifier)* -> pass_up
     | -> pass_up
 
 field: variable_decl -> pass_up_first_element
     | function_decl -> pass_up_first_element
 
-interface_decl: "interface" IDENT "{" (prototype)* "}" -> new_interface
+interface_decl: "interface" identifier "{" (prototype)* "}" -> new_interface
 
-prototype: type IDENT "(" formals ")" ";"
-    | "void" IDENT "(" formals ")" ";"
+prototype: type identifier "(" formals ")" ";"
+    | "void" identifier "(" formals ")" ";"
 
 stmt_block: "{" (variable_decl)* (stmt)* "}"
 
@@ -56,11 +56,11 @@ while_stmt: "while" "(" expr ")" stmt
 
 for_stmt: "for" "(" optional_expression ";" expr ";" optional_expression ")" stmt
 
+return_stmt: "return" optional_expression ";" -> return_statement
+
 optional_expression: (expr)? -> pass_up_first_element
 
-return_stmt: "return" (expr)? ";"
-
-break_stmt: "break" ";"
+break_stmt: "break" ";" -> break_statement
 
 print_stmt : "Print" "(" expr ("," expr)* ")" ";" -> print
 
@@ -83,7 +83,7 @@ expr : assignment
     | logical_or
     | "ReadInteger" "(" ")" -> read_integer
     | "ReadLine" "(" ")"
-    | "new" IDENT
+    | "new" identifier
     | "NewArray" "(" expr "," type ")"
 
 minus.8: "-" expr -> minus
@@ -103,15 +103,17 @@ logical_and.4: expr "&&" expr -> logical_and
 logical_or.4: expr "||" expr -> logical_or
 assignment: l_value "=" expr -> assignment
 
-l_value: IDENT
-    | expr "." IDENT
+l_value: identifier
+    | expr "." identifier
     | expr "[" expr "]"
 
-call: IDENT "(" actuals ")"
-    | expr "." IDENT "(" actuals ")"
+call: identifier "(" actuals ")"
+    | expr "." identifier "(" actuals ")"
 
 actuals:  expr ("," expr)*
     |
+
+identifier: IDENT -> identifier
 
 constant: INTEGER
     | DOUBLE

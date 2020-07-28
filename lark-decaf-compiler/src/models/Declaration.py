@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from .Identifier import Identifier
 from .Node import Node
-from .Statement import Statement
-from .Type import Type, NamedType
+
+if TYPE_CHECKING:
+    from .Statement import Statement
+    from .Type import Type, NamedType
 
 
 @dataclass

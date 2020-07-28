@@ -1,11 +1,16 @@
-import enum
-from dataclasses import dataclass
+from __future__ import annotations
 
-from .Identifier import Identifier
+from dataclasses import dataclass
+from enum import Enum
+from typing import TYPE_CHECKING
+
 from .Node import Node
 
+if TYPE_CHECKING:
+    from .Identifier import Identifier
 
-class PrimitiveTypes(enum):
+
+class PrimitiveTypes(Enum):
     INT = "int"
     DOUBLE = "double"
     BOOL = "bool"
