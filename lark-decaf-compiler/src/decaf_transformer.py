@@ -1,9 +1,12 @@
+from typing import List
+
 from lark import Transformer
 
 from .models.Declaration import (
     FunctionDeclaration,
     VariableDeclaration,
     ClassDeclaration,
+    Declaration,
 )
 from .models.Expression import (
     ReadInteger,
@@ -271,10 +274,17 @@ class DecafTransformer(Transformer):
     def read_line(self, args):
         return ReadLine()
 
-    def finalize(self, args):
+    def finalize(self, args: List[Declaration]):
         symbol_table = SymbolTable()
-        # initialize global scope
+        # Initialize global scope
         for arg in args:
             symbol_table.add_declaration_to_global_scope(arg)
-        # start generating code
+        # Generate code
+        code = ""
+        for arg in args:
+            # Uncomment if generate_code is implemented in needed models
+            # code_part, symbol_table = arg.generate_code(symbol_table)
+            # code += code_part
+            pass
+        # Write on file
         # TODO
