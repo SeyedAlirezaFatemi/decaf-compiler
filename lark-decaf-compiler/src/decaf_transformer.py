@@ -276,9 +276,11 @@ class DecafTransformer(Transformer):
 
     def finalize(self, args: List[Declaration]):
         symbol_table = SymbolTable()
+        # First Pass
         # Initialize global scope
         for arg in args:
             symbol_table.add_declaration_to_global_scope(arg)
+        # Second Pass
         # Generate code
         code = ""
         for arg in args:
