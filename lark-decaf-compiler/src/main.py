@@ -48,8 +48,10 @@ class HELLO{}
     )
     tree = decaf_parser.parse(
         """
+    int a;
+    int b;
     class HELLO{
-    int getAge() {}
+        int getAge() {}
     }
     /* int getAge() {
         a.a();

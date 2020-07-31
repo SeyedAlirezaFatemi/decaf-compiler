@@ -31,6 +31,7 @@ from .models.Statement import (
     OptionalExpressionStatement,
     Statement,
 )
+from .models.SymbolTable import SymbolTable
 from .models.Type import Type
 
 variable_size = {"int": 4, "string": 100, "double": 8, "bool": 4}
@@ -271,5 +272,9 @@ class DecafTransformer(Transformer):
         return ReadLine()
 
     def finalize(self, args):
-        print(args)
-        pass
+        symbol_table = SymbolTable()
+        # initialize global scope
+        for arg in args:
+            symbol_table.add_declaration_to_global_scope(arg)
+        # start generating code
+        # TODO

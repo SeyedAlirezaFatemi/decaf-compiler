@@ -1,9 +1,14 @@
-from dataclasses import dataclass
-from typing import List, Optional
+from __future__ import annotations
 
-from .Declaration import VariableDeclaration
-from .Expression import Expression
+from dataclasses import dataclass
+from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+
 from .Node import Node
+
+if TYPE_CHECKING:
+    from .SymbolTable import SymbolTable
+    from .Declaration import VariableDeclaration
+    from .Expression import Expression
 
 
 @dataclass
@@ -15,6 +20,18 @@ class Statement(Node):
 class StatementBlock(Statement):
     variable_declarations: List[VariableDeclaration]
     statements: List[Statement]
+
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        statement_block_scope = symbol_table.enter_new_scope()
+        code = ""
+        # TODO: Check this.
+        for var_decl in self.variable_declarations:
+            code += var_decl.generate_code(symbol_table)
+        for statement in self.statements:
+            code += statement.generate_code(symbol_table)
+        # Clean block scope cause we are out of the block
+        symbol_table.set_current_scope(statement_block_scope.parent_scope)
+        return code, symbol_table
 
 
 @dataclass
@@ -30,13 +47,6 @@ class IfStatement(Statement):
 
 
 @dataclass
-class WhileStatement(Statement):
-    condition_expression: Expression
-    body_statement: Statement
-    end_label: str = "UNSPECIFIED"
-
-
-@dataclass
 class ReturnStatement(Statement):
     return_expression: Optional[Expression]
 
@@ -44,6 +54,25 @@ class ReturnStatement(Statement):
 @dataclass
 class PrintStatement(Statement):
     args: List[Expression]
+
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        # TODO: generate code for each expression then based on output type call the
+        # print function in standard_library_functions.py
+        pass
+
+
+@dataclass
+class WhileStatement(Statement):
+    condition_expression: Expression
+    body_statement: Statement
+    end_label: str = "UNSPECIFIED"
+
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        code = ""
+        symbol_table.enter_loop(self)
+        # TODO: code generation
+        symbol_table.exit_loop()
+        return code, symbol_table
 
 
 @dataclass
@@ -54,14 +83,20 @@ class ForStatement(Statement):
     body_statement: Statement
     end_label: str = "UNSPECIFIED"
 
-    def generate_code(self, scope) -> str:
-        code = "_L2:\n"
-        code += self.initialization_expression.generate_code(scope)
-        code += self.condition_expression.generate_code(scope)
-        code += self.statement.generate_code(scope)
-        return code
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        code = ""
+        symbol_table.enter_loop(self)
+        # TODO: code generation
+        symbol_table.exit_loop()
+        return code, symbol_table
+
+
+LoopStatement = Union[WhileStatement, ForStatement]
 
 
 @dataclass
 class BreakStatement(Statement):
-    pass
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        current_loop_statement = symbol_table.get_current_loop_statement()
+        end_label = current_loop_statement.end_label
+        return f"j {end_label}", symbol_table

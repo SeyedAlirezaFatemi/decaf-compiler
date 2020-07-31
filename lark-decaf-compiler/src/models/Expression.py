@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Tuple
 
 from .Identifier import Identifier
 from .Node import Node
-from .Type import Type
 
 if TYPE_CHECKING:
+    from .Type import Type
+    from .SymbolTable import SymbolTable
     from typing import TYPE_CHECKING
 
 
@@ -54,12 +55,18 @@ class ThisExpression(Expression):
 
 @dataclass
 class ReadInteger(Expression):
-    pass
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        code = ""
+        # TODO: call the _ReadInteger function in standard_library_functions.py
+        return code, symbol_table
 
 
 @dataclass
 class ReadLine(Expression):
-    pass
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        code = ""
+        # TODO: call the _ReadLine function in standard_library_functions.py
+        return code, symbol_table
 
 
 @dataclass
