@@ -23,6 +23,7 @@ class VariableDeclaration(Declaration):
     is_class_member: bool = False
     class_member_offset: int = 0
     is_function_parameter: bool = False
+    function_parameter_offset: int = 0
 
 
 @dataclass
@@ -36,8 +37,16 @@ class FunctionDeclaration(Declaration):
 
 @dataclass
 class ClassDeclaration(Declaration):
-    extends: Identifier
+    extends: Optional[Identifier]
     variables: List[VariableDeclaration]
     methods: List[FunctionDeclaration]
     instance_size: int = 0
     vtable_size: int = 0
+
+    def find_method_declaration(
+        self, method_identifier: Identifier
+    ) -> FunctionDeclaration:
+        for method in self.methods:
+            if method.identifier.name == method_identifier.name:
+                return method
+        print("Error")

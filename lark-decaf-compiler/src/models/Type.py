@@ -17,6 +17,9 @@ class PrimitiveTypes(Enum):
     STRING = "string"
 
 
+PRIMITIVE_TYPES = {"int", "double", "bool", "string"}
+
+
 @dataclass
 class Type(Node):
     name: str

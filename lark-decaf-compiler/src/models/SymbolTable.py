@@ -4,20 +4,20 @@ from typing import Dict, Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .Statement import LoopStatement
-    from .Declaration import Declaration
+    from .Declaration import Declaration, ClassDeclaration
 
 
 class Scope:
     name_declaration_map: Dict[str, Declaration]
     parent_scope: Optional[Scope]
-    parent_class_name: Optional[str]
     owner_class_name: Optional[str]
+    parent_class_name: Optional[str]
 
     def __init__(
         self,
         parent_scope: Optional[Scope] = None,
-        parent_class_name: Optional[str] = None,
         owner_class_name: Optional[str] = None,
+        parent_class_name: Optional[str] = None,
     ):
         self.name_declaration_map = dict()
         self.parent_scope = parent_scope
@@ -34,6 +34,13 @@ class Scope:
 
     def add_declaration(self, declaration: Declaration):
         self.name_declaration_map[declaration.identifier.name] = declaration
+
+    def find_which_class_we_are_in(self) -> ClassDeclaration:
+        if self.owner_class_name is not None:
+            return self.lookup(self.owner_class_name)
+        if self.parent_scope is None:
+            print("Error")
+        return self.parent_scope.find_which_class_we_are_in()
 
 
 class SymbolTable:
@@ -55,6 +62,12 @@ class SymbolTable:
 
     def get_current_loop_statement(self) -> LoopStatement:
         return self.exterior_loop_statements[-1]
+
+    def get_current_scope(self) -> Scope:
+        return self.current_scope
+
+    def get_global_scope(self) -> Scope:
+        return self.global_scope
 
     def set_current_scope(self, scope: Scope):
         self.current_scope = scope

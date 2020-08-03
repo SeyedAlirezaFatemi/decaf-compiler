@@ -81,6 +81,12 @@ class DecafTransformer(Transformer):
         )
         function_identifier.declaration = function_declaration
         function_identifier.new = True
+        offset = 0
+        for idx, formal_parameter in enumerate(function_declaration.formal_parameters):
+            formal_parameter.is_function_parameter = True
+            formal_parameter.function_parameter_offset = offset
+            # TODO: This addition should be based on formal_parameter.variable_type
+            offset += 4
         return function_declaration
 
     def new_void_function(self, args):
@@ -90,6 +96,12 @@ class DecafTransformer(Transformer):
         )
         function_identifier.declaration = function_declaration
         function_identifier.new = True
+        offset = 0
+        for idx, formal_parameter in enumerate(function_declaration.formal_parameters):
+            formal_parameter.is_function_parameter = True
+            formal_parameter.function_parameter_offset = offset
+            # TODO: This addition should be based on formal_parameter.variable_type
+            offset += 4
         return function_declaration
 
     def new_class(self, args):
@@ -105,6 +117,7 @@ class DecafTransformer(Transformer):
                 variable_declarations.append(field)
                 field.is_class_member = True
                 field.class_member_offset = class_member_offset
+                # TODO: This addition should be based on field.variable_type
                 class_member_offset += 0  # Variable size
             else:
                 method_declarations.append(field)
