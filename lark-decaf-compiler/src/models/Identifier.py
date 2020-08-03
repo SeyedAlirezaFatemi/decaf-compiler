@@ -18,5 +18,9 @@ class Identifier(Node):
     new: bool = False
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        decl_type = type(self.declaration)
-        # TODO: find declaration type
+        from .Declaration import VariableDeclaration
+
+        if isinstance(self.declaration, VariableDeclaration):
+            return self.declaration.variable_type
+        # Well...
+        # What about the others?

@@ -50,4 +50,6 @@ class ClassDeclaration(Declaration):
         for method in self.methods:
             if method.identifier.name == method_identifier.name:
                 return method
-        print(f"Error. Method {method_identifier.name} not found in class {self.identifier.name}!")
+        print(
+            f"Error. Method {method_identifier.name} not found in class {self.identifier.name}!"
+        )
