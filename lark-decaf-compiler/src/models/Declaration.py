@@ -46,7 +46,8 @@ class ClassDeclaration(Declaration):
     def find_method_declaration(
         self, method_identifier: Identifier
     ) -> FunctionDeclaration:
+        # The optimal solution is to have the methods in a set.
         for method in self.methods:
             if method.identifier.name == method_identifier.name:
                 return method
-        print("Error")
+        print(f"Error. Method {method_identifier.name} not found in class {self.identifier.name}!")
