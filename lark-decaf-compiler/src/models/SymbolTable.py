@@ -50,6 +50,8 @@ class SymbolTable:
     exterior_loop_statements: List[LoopStatement]
     for_number: int = 0
     while_number: int = 0
+    else_number: int = 0
+    if_number: int = 0
 
     def __init__(self):
         # init global scope
@@ -98,3 +100,12 @@ class SymbolTable:
     def get_current_for_number(self) -> int:
         self.for_number += 1
         return self.for_number
+    
+    def get_current_if_number(self) -> int:
+        self.if_number += 1
+        return self.if_number
+
+    def get_current_else_number(self) -> int:
+        self.else_number += 1
+        return self.else_number
+

@@ -42,7 +42,39 @@ class OptionalExpressionStatement(Statement):
 class IfStatement(Statement):
     condition_expression: Expression
     body_statement: Statement
+    if_number: int = 0
+    else_number: int = 0
     else_body_statement: Optional[Statement] = None
+    start_if_label: str = "UNSPECIFIED"
+    end_if_label: str = "UNSPECIFIED"
+    start_else_label: str = "UNSPECIFIED"
+
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        if (self.else_body_statement == None):
+            code = ""
+            self.if_number = symbol_table.get_current_if_number()
+            self.end_if_label = f"end_if_{self.if_number}"
+            code += self.condition_expression.generate_code(symbol_table)
+            code += f"beqz $t1, end_if_{self.end_if_label} \n"
+            code += self.body_statement.generate_code(symbol_table)
+            code += self.end_if_label
+
+
+        else:
+            code = ""
+            self.else_number = symbol_table.get_current_else_number()
+            self.start_else_label = f"else_{self.else_number}"
+            self.end_else_label = f"end_else_{self.else_number}\n"
+            code += self.condition_expression.generate_code(symbol_table)
+            code += f"beqz $t1, else_{self.start_else_label}\n"
+            code += self.body_statement.generate_code(symbol_table)
+            code += f"jmp {self.end_else_label}"
+            code += self.start_else_label
+            code += self.else_body_statement.generate_code(symbol_table)
+            code += self.end_else_label
+
+        return code, symbol_table
+
 
 
 @dataclass
