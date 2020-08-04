@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, List
 
-from .Declaration import ClassDeclaration
+from .Declaration import ClassDeclaration, FunctionDeclaration
 from .Identifier import Identifier
 from .Node import Node
 from .Type import Type, PrimitiveTypes, NamedType, ArrayType
@@ -44,7 +44,7 @@ class BinaryExpression(Expression):
     right_expression: Expression
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        # TODO: based on operators and left and righ expression
+        # TODO: based on operators and left and right expression
         pass
 
 
@@ -110,8 +110,11 @@ class MemberAccessLValue(LValue):
     identifier: Identifier
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        # TODO
-        pass
+        class_type = self.expression.evaluate_type(symbol_table)
+        assert isinstance(class_type, NamedType)
+        class_decl = symbol_table.get_global_scope().lookup(class_type.name)
+        assert isinstance(class_decl, ClassDeclaration)
+        return class_decl.find_variable_declaration(self.identifier).variable_type
 
 
 @dataclass
@@ -120,8 +123,9 @@ class ArrayAccessLValue(LValue):
     index_expression: Expression
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        # TODO
-        pass
+        array_type = self.array_expression.evaluate_type(symbol_table)
+        assert isinstance(array_type, ArrayType)
+        return array_type.elementType
 
 
 @dataclass
@@ -145,6 +149,7 @@ class FunctionCall(Call):
     actual_parameters: List[Expression]
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
+        assert isinstance(self.function_identifier.declaration, FunctionDeclaration)
         return self.function_identifier.declaration.return_type
 
 
@@ -163,8 +168,10 @@ class MethodCall(Call):
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        class_type: NamedType = self.class_expression.evaluate_type(symbol_table)
-        class_decl: ClassDeclaration = class_type.identifier.declaration
+        class_type = self.class_expression.evaluate_type(symbol_table)
+        assert isinstance(class_type, NamedType)
+        class_decl = class_type.identifier.declaration
+        assert isinstance(class_decl, ClassDeclaration)
         method_decl = class_decl.find_method_declaration(self.method_identifier)
         return method_decl.return_type
 

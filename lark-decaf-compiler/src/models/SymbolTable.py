@@ -24,7 +24,7 @@ class Scope:
         self.parent_class_name = parent_class_name
         self.owner_class_name = owner_class_name
 
-    def lookup(self, name):
+    def lookup(self, name) -> Declaration:
         if name in self.name_declaration_map:
             return self.name_declaration_map[name]
         if self.parent_scope is None:

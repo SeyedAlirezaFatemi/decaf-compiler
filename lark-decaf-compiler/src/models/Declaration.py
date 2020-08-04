@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING, Optional, Tuple
+from typing import List, TYPE_CHECKING, Optional
 
 from .Identifier import Identifier
 from .Node import Node
@@ -49,6 +49,17 @@ class ClassDeclaration(Declaration):
     methods: List[FunctionDeclaration]
     instance_size: int = 0
     vtable_size: int = 0
+
+    def find_variable_declaration(
+        self, variable_identifier: Identifier
+    ) -> VariableDeclaration:
+        # The optimal solution is to have the methods in a set.
+        for variable in self.variables:
+            if variable.identifier.name == variable_identifier.name:
+                return variable
+        print(
+            f"Error. Method {variable_identifier.name} not found in class {self.identifier.name}!"
+        )
 
     def find_method_declaration(
         self, method_identifier: Identifier
