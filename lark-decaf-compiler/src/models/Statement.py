@@ -24,11 +24,12 @@ class StatementBlock(Statement):
     def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
         statement_block_scope = symbol_table.enter_new_scope()
         code = ""
-        # TODO: Check this.
         for var_decl in self.variable_declarations:
-            code += var_decl.generate_code(symbol_table)
+            new_code, symbol_table = var_decl.generate_code(symbol_table)
+            code += new_code
         for statement in self.statements:
-            code += statement.generate_code(symbol_table)
+            new_code, symbol_table = statement.generate_code(symbol_table)
+            code += new_code
         # Clean block scope cause we are out of the block
         symbol_table.set_current_scope(statement_block_scope.parent_scope)
         return code, symbol_table

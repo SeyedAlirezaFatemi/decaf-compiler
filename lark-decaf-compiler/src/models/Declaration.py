@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING, Optional
+from typing import List, TYPE_CHECKING, Optional, Tuple
 
 from .Identifier import Identifier
 from .Node import Node
 
 if TYPE_CHECKING:
     from .Statement import Statement
+    from .SymbolTable import SymbolTable
     from .Type import Type
 
 
@@ -24,6 +25,12 @@ class VariableDeclaration(Declaration):
     class_member_offset: int = 0
     is_function_parameter: bool = False
     function_parameter_offset: int = 0
+
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        current_scope = symbol_table.enter_new_scope()
+        current_scope.add_declaration(self)
+        # TODO: Do we need to generate code?
+        return "", symbol_table
 
 
 @dataclass
