@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List
 
 from .Declaration import ClassDeclaration
 from .Identifier import Identifier
@@ -71,10 +71,10 @@ class ThisExpression(Expression):
 
 @dataclass
 class ReadInteger(Expression):
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         code = ""
         # TODO: call the _ReadInteger function in standard_library_functions.py
-        return code, symbol_table
+        return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return Type(PrimitiveTypes.INT.value)
@@ -82,10 +82,10 @@ class ReadInteger(Expression):
 
 @dataclass
 class ReadLine(Expression):
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         code = ""
         # TODO: call the _ReadLine function in standard_library_functions.py
-        return code, symbol_table
+        return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return Type(PrimitiveTypes.STRING.value)
@@ -154,13 +154,13 @@ class MethodCall(Call):
     method_identifier: Identifier
     actual_parameters: List[Expression]
 
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         code = ""
         # TODO
         # Find class_expression type
         # the method label in assembly will be "_{class_name}_{method_name}"
         # call that function
-        return code, symbol_table
+        return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         class_type: NamedType = self.class_expression.evaluate_type(symbol_table)

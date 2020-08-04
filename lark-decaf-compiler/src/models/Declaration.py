@@ -26,11 +26,11 @@ class VariableDeclaration(Declaration):
     is_function_parameter: bool = False
     function_parameter_offset: int = 0
 
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         current_scope = symbol_table.enter_new_scope()
         current_scope.add_declaration(self)
         # TODO: Do we need to generate code?
-        return "", symbol_table
+        return ""
 
 
 @dataclass

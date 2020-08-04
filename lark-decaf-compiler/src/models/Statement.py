@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import List, Optional, TYPE_CHECKING, Union
 
 from .Node import Node
 
@@ -21,17 +21,16 @@ class StatementBlock(Statement):
     variable_declarations: List[VariableDeclaration]
     statements: List[Statement]
 
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         statement_block_scope = symbol_table.enter_new_scope()
         code = ""
-        # TODO: Check this.
         for var_decl in self.variable_declarations:
             code += var_decl.generate_code(symbol_table)
         for statement in self.statements:
             code += statement.generate_code(symbol_table)
         # Clean block scope cause we are out of the block
         symbol_table.set_current_scope(statement_block_scope.parent_scope)
-        return code, symbol_table
+        return code
 
 
 @dataclass
@@ -55,7 +54,7 @@ class ReturnStatement(Statement):
 class PrintStatement(Statement):
     args: List[Expression]
 
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         # TODO: generate code for each expression then based on output type call the
         # print function in standard_library_functions.py
         pass
@@ -65,23 +64,23 @@ class PrintStatement(Statement):
 class WhileStatement(Statement):
     condition_expression: Expression
     body_statement: Statement
-    while_number: int
+    while_number: int = 0
     start_label: str = "UNSPECIFIED"
     end_label: str = "UNSPECIFIED"
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         code = ""
         symbol_table.enter_loop(self)
         self.while_number = symbol_table.get_current_while_number()
-        self.start_label = "for " + str(self.while_number)
-        self.end_label = "endfor " + str(self.while_number)
-        code += self.start_label + ": \n"
-        code += self.condition_expression.generate_code()
-        code += "beqz $t1," + self.end_label
-        code += self.body_statement.generate_code()
-        code += self.update_expression.generate_code()
+        self.start_label = "while_" + str(self.while_number)
+        self.end_label = "end_while_" + str(self.while_number)
+        code += f"{self.start_label}:\n"
+        code += self.condition_expression.generate_code(symbol_table)
+        code += f"beqz $t1,{self.end_label}\n"
+        code += self.body_statement.generate_code(symbol_table)
         code += self.end_label
         symbol_table.exit_loop()
-        return code, symbol_table
+        return code
 
 
 @dataclass
@@ -90,28 +89,29 @@ class ForStatement(Statement):
     condition_expression: Expression
     update_expression: Optional[Expression]
     body_statement: Statement
-    for_number: int
+    for_number: int = 0
     start_label: str = "UNSPECIFIED"
     end_label: str = "UNSPECIFIED"
 
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         code = ""
         symbol_table.enter_loop(self)
-        self.for_number=symbol_table.get_current_for_number()
-        self.start_label="for " + str(self.for_number)
-        self.end_label="endfor " + str(self.for_number)
-        code+=self.initialization_expression.generate_code()
-        code+=self.start_label +": \n"
-        code+=self.condition_expression.generate_code()
-        code+="beqz $t1,"+ self.end_label
-        code+=self.body_statement.generate_code()
-        code+=self.update_expression.generate_code()
-        code+=self.end_label
+        self.for_number = symbol_table.get_current_for_number()
+        self.start_label = "for_" + str(self.for_number)
+        self.end_label = "end_for_" + str(self.for_number)
+
+        if self.initialization_expression is not None:
+            code += self.initialization_expression.generate_code(symbol_table)
+        code += f"{self.start_label}:\n"
+        code += self.condition_expression.generate_code(symbol_table)
+        code += f"beqz $t1,{self.end_label}\n"
+        code += self.body_statement.generate_code(symbol_table)
+        if self.update_expression is not None:
+            code += self.update_expression.generate_code(symbol_table)
+        code += self.end_label
 
         symbol_table.exit_loop()
-        return code, symbol_table
-
-
+        return code
 
 
 LoopStatement = Union[WhileStatement, ForStatement]
@@ -119,7 +119,7 @@ LoopStatement = Union[WhileStatement, ForStatement]
 
 @dataclass
 class BreakStatement(Statement):
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         current_loop_statement = symbol_table.get_current_loop_statement()
         end_label = current_loop_statement.end_label
-        return f"j {end_label}", symbol_table
+        return f"j {end_label}"

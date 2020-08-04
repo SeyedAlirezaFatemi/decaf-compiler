@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING, Tuple
+from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .SymbolTable import SymbolTable
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Node:
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+    def generate_code(self, symbol_table: SymbolTable) -> str:
         pass
 
 
