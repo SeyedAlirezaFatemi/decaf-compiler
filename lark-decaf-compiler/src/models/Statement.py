@@ -21,9 +21,9 @@ class StatementBlock(Statement):
     variable_declarations: List[VariableDeclaration]
     statements: List[Statement]
 
-    def generate_code(self, symbol_table: SymbolTable) -> str:
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         statement_block_scope = symbol_table.enter_new_scope()
-        code = ""
+        code = []
         for var_decl in self.variable_declarations:
             code += var_decl.generate_code(symbol_table)
         for statement in self.statements:
@@ -42,39 +42,37 @@ class OptionalExpressionStatement(Statement):
 class IfStatement(Statement):
     condition_expression: Expression
     body_statement: Statement
+    else_body_statement: Optional[Statement] = None
     if_number: int = 0
     else_number: int = 0
-    else_body_statement: Optional[Statement] = None
     start_if_label: str = "UNSPECIFIED"
     end_if_label: str = "UNSPECIFIED"
     start_else_label: str = "UNSPECIFIED"
+    end_else_label: str = "UNSPECIFIED"
 
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
-        if (self.else_body_statement == None):
-            code = ""
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
+        if self.else_body_statement is None:
             self.if_number = symbol_table.get_current_if_number()
             self.end_if_label = f"end_if_{self.if_number}"
             code += self.condition_expression.generate_code(symbol_table)
-            code += f"beqz $t1, end_if_{self.end_if_label} \n"
+            code.append(f"beqz $t1, {self.end_if_label}")
             code += self.body_statement.generate_code(symbol_table)
-            code += self.end_if_label
-
+            code.append(f"{self.end_if_label}:")
 
         else:
-            code = ""
             self.else_number = symbol_table.get_current_else_number()
             self.start_else_label = f"else_{self.else_number}"
-            self.end_else_label = f"end_else_{self.else_number}\n"
+            self.end_else_label = f"end_else_{self.else_number}"
             code += self.condition_expression.generate_code(symbol_table)
-            code += f"beqz $t1, else_{self.start_else_label}\n"
+            code.append(f"beqz $t1, {self.start_else_label}")
             code += self.body_statement.generate_code(symbol_table)
-            code += f"jmp {self.end_else_label}"
-            code += self.start_else_label
+            code.append(f"jmp {self.end_else_label}")
+            code.append(f"{self.start_else_label}:")
             code += self.else_body_statement.generate_code(symbol_table)
-            code += self.end_else_label
+            code.append(f"{self.end_else_label}:")
 
-        return code, symbol_table
-
+        return code
 
 
 @dataclass
@@ -86,7 +84,7 @@ class ReturnStatement(Statement):
 class PrintStatement(Statement):
     args: List[Expression]
 
-    def generate_code(self, symbol_table: SymbolTable) -> str:
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         # TODO: generate code for each expression then based on output type call the
         # print function in standard_library_functions.py
         pass
@@ -100,17 +98,17 @@ class WhileStatement(Statement):
     start_label: str = "UNSPECIFIED"
     end_label: str = "UNSPECIFIED"
 
-    def generate_code(self, symbol_table: SymbolTable) -> str:
-        code = ""
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
         symbol_table.enter_loop(self)
         self.while_number = symbol_table.get_current_while_number()
         self.start_label = "while_" + str(self.while_number)
         self.end_label = "end_while_" + str(self.while_number)
-        code += f"{self.start_label}:\n"
+        code.append(f"{self.start_label}:")
         code += self.condition_expression.generate_code(symbol_table)
-        code += f"beqz $t1,{self.end_label}\n"
+        code.append(f"beqz $t1,{self.end_label}")
         code += self.body_statement.generate_code(symbol_table)
-        code += self.end_label
+        code.append(f"{self.end_label}:")
         symbol_table.exit_loop()
         return code
 
@@ -125,8 +123,8 @@ class ForStatement(Statement):
     start_label: str = "UNSPECIFIED"
     end_label: str = "UNSPECIFIED"
 
-    def generate_code(self, symbol_table: SymbolTable) -> str:
-        code = ""
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
         symbol_table.enter_loop(self)
         self.for_number = symbol_table.get_current_for_number()
         self.start_label = "for_" + str(self.for_number)
@@ -134,13 +132,13 @@ class ForStatement(Statement):
 
         if self.initialization_expression is not None:
             code += self.initialization_expression.generate_code(symbol_table)
-        code += f"{self.start_label}:\n"
+        code.append(f"{self.start_label}:")
         code += self.condition_expression.generate_code(symbol_table)
-        code += f"beqz $t1,{self.end_label}\n"
+        code.append(f"beqz $t1,{self.end_label}")
         code += self.body_statement.generate_code(symbol_table)
         if self.update_expression is not None:
             code += self.update_expression.generate_code(symbol_table)
-        code += self.end_label
+        code.append(f"{self.end_label}:")
 
         symbol_table.exit_loop()
         return code
@@ -151,7 +149,7 @@ LoopStatement = Union[WhileStatement, ForStatement]
 
 @dataclass
 class BreakStatement(Statement):
-    def generate_code(self, symbol_table: SymbolTable) -> str:
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         current_loop_statement = symbol_table.get_current_loop_statement()
         end_label = current_loop_statement.end_label
-        return f"j {end_label}"
+        return [f"j {end_label}"]

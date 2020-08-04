@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Node:
-    def generate_code(self, symbol_table: SymbolTable) -> str:
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         pass
 
 

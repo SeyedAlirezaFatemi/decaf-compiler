@@ -71,8 +71,8 @@ class ThisExpression(Expression):
 
 @dataclass
 class ReadInteger(Expression):
-    def generate_code(self, symbol_table: SymbolTable) -> str:
-        code = ""
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
         # TODO: call the _ReadInteger function in standard_library_functions.py
         return code
 
@@ -82,8 +82,8 @@ class ReadInteger(Expression):
 
 @dataclass
 class ReadLine(Expression):
-    def generate_code(self, symbol_table: SymbolTable) -> str:
-        code = ""
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
         # TODO: call the _ReadLine function in standard_library_functions.py
         return code
 
@@ -159,8 +159,8 @@ class MethodCall(Call):
     method_identifier: Identifier
     actual_parameters: List[Expression]
 
-    def generate_code(self, symbol_table: SymbolTable) -> str:
-        code = ""
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
         # TODO
         # Find class_expression type
         # the method label in assembly will be "_{class_name}_{method_name}"
