@@ -39,6 +39,11 @@ class StatementBlock(Statement):
 class OptionalExpressionStatement(Statement):
     expression: Optional[Expression] = None
 
+    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
+        if self.expression is None:
+            return "", symbol_table
+        return self.expression.generate_code(symbol_table)
+
 
 @dataclass
 class IfStatement(Statement):
