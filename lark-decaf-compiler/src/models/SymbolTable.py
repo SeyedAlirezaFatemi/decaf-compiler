@@ -48,6 +48,9 @@ class SymbolTable:
     current_scope: Scope
     # This is for keeping track of the loop statements we are inside so we can break out easily
     exterior_loop_statements: List[LoopStatement]
+    for_number: int=0
+    while_number: int=0
+
 
     def __init__(self):
         # init global scope
@@ -88,3 +91,12 @@ class SymbolTable:
 
     def add_declaration_to_current_scope(self, declaration: Declaration):
         self.current_scope.add_declaration(declaration)
+
+    def get_current_while_number(self):
+        self.while_number+=1
+        return self.while_number
+
+    def get_current_for_number(self):
+        self.for_number += 1
+        return self.for_number
+

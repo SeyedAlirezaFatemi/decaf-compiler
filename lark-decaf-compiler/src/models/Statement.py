@@ -24,12 +24,11 @@ class StatementBlock(Statement):
     def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
         statement_block_scope = symbol_table.enter_new_scope()
         code = ""
+        # TODO: Check this.
         for var_decl in self.variable_declarations:
-            new_code, symbol_table = var_decl.generate_code(symbol_table)
-            code += new_code
+            code += var_decl.generate_code(symbol_table)
         for statement in self.statements:
-            new_code, symbol_table = statement.generate_code(symbol_table)
-            code += new_code
+            code += statement.generate_code(symbol_table)
         # Clean block scope cause we are out of the block
         symbol_table.set_current_scope(statement_block_scope.parent_scope)
         return code, symbol_table
@@ -38,11 +37,6 @@ class StatementBlock(Statement):
 @dataclass
 class OptionalExpressionStatement(Statement):
     expression: Optional[Expression] = None
-
-    def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
-        if self.expression is None:
-            return "", symbol_table
-        return self.expression.generate_code(symbol_table)
 
 
 @dataclass
@@ -71,12 +65,21 @@ class PrintStatement(Statement):
 class WhileStatement(Statement):
     condition_expression: Expression
     body_statement: Statement
+    while_number: int
+    start_label: str = "UNSPECIFIED"
     end_label: str = "UNSPECIFIED"
-
     def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
         code = ""
         symbol_table.enter_loop(self)
-        # TODO: code generation
+        self.while_number = symbol_table.get_current_while_number()
+        self.start_label = "for " + str(self.while_number)
+        self.end_label = "endfor " + str(self.while_number)
+        code += self.start_label + ": \n"
+        code += self.condition_expression.generate_code()
+        code += "beqz $t1," + self.end_label
+        code += self.body_statement.generate_code()
+        code += self.update_expression.generate_code()
+        code += self.end_label
         symbol_table.exit_loop()
         return code, symbol_table
 
@@ -87,14 +90,28 @@ class ForStatement(Statement):
     condition_expression: Expression
     update_expression: Optional[Expression]
     body_statement: Statement
+    for_number: int
+    start_label: str = "UNSPECIFIED"
     end_label: str = "UNSPECIFIED"
 
     def generate_code(self, symbol_table: SymbolTable) -> Tuple[str, SymbolTable]:
         code = ""
         symbol_table.enter_loop(self)
-        # TODO: code generation
+        self.for_number=symbol_table.get_current_for_number()
+        self.start_label="for " + str(self.for_number)
+        self.end_label="endfor " + str(self.for_number)
+        code+=self.initialization_expression.generate_code()
+        code+=self.start_label +": \n"
+        code+=self.condition_expression.generate_code()
+        code+="beqz $t1,"+ self.end_label
+        code+=self.body_statement.generate_code()
+        code+=self.update_expression.generate_code()
+        code+=self.end_label
+
         symbol_table.exit_loop()
         return code, symbol_table
+
+
 
 
 LoopStatement = Union[WhileStatement, ForStatement]
