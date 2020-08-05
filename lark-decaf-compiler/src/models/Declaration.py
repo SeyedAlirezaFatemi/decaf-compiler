@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, TYPE_CHECKING, Optional
 
-from ..utils import calc_variable_size
 from .Identifier import Identifier
 from .Node import Node
+from ..utils import calc_variable_size
 
 if TYPE_CHECKING:
     from .Statement import Statement
@@ -35,7 +35,10 @@ class VariableDeclaration(Declaration):
         if not (self.is_global or self.is_class_member or self.is_function_parameter):
             self.local_offset = symbol_table.get_local_offset()
             symbol_table.increment_local_offset(calc_variable_size(self.variable_type))
-        return []
+        code = [
+            f"subu $sp, $sp, {calc_variable_size(self.variable_type)} # decrement sp to make space for variable {self.identifier.name}"
+        ]
+        return code
 
 
 @dataclass

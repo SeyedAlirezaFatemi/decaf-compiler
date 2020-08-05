@@ -29,9 +29,10 @@ class StatementBlock(Statement):
         for statement in self.statements:
             code += statement.generate_code(symbol_table)
         # Pop variables in order to correct local offset
-        symbol_table.pop_variables_till_block(
+        freed_space = symbol_table.pop_variables_till_block(
             symbol_table.get_current_scope(), statement_block_scope
         )
+        code.append(f"addiu $sp, $sp, {freed_space} # Freed space")
         # Clean block scope cause we are out of the block
         symbol_table.set_current_scope(statement_block_scope.parent_scope)
         return code

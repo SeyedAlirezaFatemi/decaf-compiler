@@ -125,11 +125,17 @@ class SymbolTable:
     def get_local_offset(self) -> int:
         return self.local_offset
 
-    def pop_variables_till_block(self, scope: Scope, block_scope: Scope):
+    def pop_variables_till_block(
+        self, scope: Scope, block_scope: Scope, popped_size_till_now: int = 0
+    ) -> int:
         if scope == block_scope:
-            return
+            return popped_size_till_now
         for decl in scope.name_declaration_map.values():
             assert isinstance(decl, VariableDeclaration)
             # Pop variables
-            self.decrement_local_offset(calc_variable_size(decl.variable_type))
-        self.pop_variables_till_block(scope.parent_scope, block_scope)
+            size = calc_variable_size(decl.variable_type)
+            self.decrement_local_offset(size)
+            popped_size_till_now += size
+        self.pop_variables_till_block(
+            scope.parent_scope, block_scope, popped_size_till_now
+        )
