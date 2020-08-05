@@ -94,25 +94,32 @@ class LValue(Expression):
     pass
 
 
+OFFSET_TO_FIRST_LOCAL = -8
+OFFSET_TO_FIRST_PARAM = 4
+OFFSET_TO_FIRST_GLOBAL = 0
+
+
 @dataclass
 class IdentifierLValue(LValue):
     identifier: Identifier
 
     def calculate_address(self, symbol_table: SymbolTable):
+        """
+        In a MIPS stack frame, first local is at fp-8, subsequent locals are at fp-12, fp-16, and so on.
+        The first param is at fp+4, subsequent ones as fp+8, fp+12, etc. (Because methods have secret
+        "this" passed in first param slot at fp+4, all normal params are shifted up by 4.)
+        """
         decl = self.identifier.declaration
         assert isinstance(decl, VariableDeclaration)
         if decl.is_class_member:
-            # TODO: use this to calc address
+            # TODO: use this to calc address. use vtable.
             decl.class_member_offset
         elif decl.is_function_parameter:
-            # TODO: use this to calc address
-            decl.function_parameter_offset
+            return f"{OFFSET_TO_FIRST_PARAM + decl.function_parameter_offset}($fp)"
         elif decl.is_global:
-            # TODO: use this to calc address
-            decl.global_offset
+            return f"{OFFSET_TO_FIRST_GLOBAL - decl.global_offset}($gp)"
         else:
-            # TODO: use this to calc address
-            decl.local_offset
+            return f"{OFFSET_TO_FIRST_LOCAL - decl.local_offset}($fp)"
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.identifier.evaluate_type(symbol_table)
