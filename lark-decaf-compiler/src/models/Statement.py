@@ -84,7 +84,15 @@ class IfStatement(Statement):
 class ReturnStatement(Statement):
     return_expression: Optional[Expression]
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        # We assume the output of expressions are saved in $t0
+        code = []
+        code.append("move    $sp, $fp ")
+        code.append("lw      $ra, -4($fp)")
+        code.append("lw      $fp, 0($fp)")
+        code.append("jr      $ra")
 
+        return code
 @dataclass
 class PrintStatement(Statement):
     args: List[Expression]
