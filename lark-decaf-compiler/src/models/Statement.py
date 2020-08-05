@@ -3,8 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional, TYPE_CHECKING, Union
 
+from ..utils import generate_clean_param_code, calc_variable_size
 from .Declaration import VariableDeclaration
 from .Node import Node
+from .Type import PrimitiveTypes
 
 if TYPE_CHECKING:
     from .SymbolTable import SymbolTable
@@ -44,8 +46,8 @@ class OptionalExpressionStatement(Statement):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
-        if(self.expression!=None):
-            code+=self.expression.generate_code()
+        if self.expression is not None:
+            code += self.expression.generate_code(symbol_table)
         return code
 
 
@@ -91,31 +93,44 @@ class ReturnStatement(Statement):
     return_expression: Optional[Expression]
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        # We assume the output of expressions are saved in $t0
+        # We assume the output of expressions are saved in $v0
         code = []
-        code.append("move    $sp, $fp ")
-        code.append("lw      $ra, -4($fp)")
-        code.append("lw      $fp, 0($fp)")
-        code.append("jr      $ra")
-
+        if self.return_expression is not None:
+            code += self.return_expression.generate_code(symbol_table)
+        # TODO: Shouldn't we move this to the end of FunctionDeclaration?
+        code += [
+            "move    $sp, $fp ",
+            "lw      $ra, -4($fp)",
+            "lw      $fp, 0($fp)",
+            "jr      $ra",
+        ]
         return code
+
+
 @dataclass
 class PrintStatement(Statement):
     args: List[Expression]
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        # We assume the output of expressions are saved in $t0
+        # We assume the output of expressions are saved in $v0
         code = []
         for expression in self.args:
             code += expression.generate_code(symbol_table)
-            code.append("subu $sp, $sp, 4\t# decrement sp to make space for print param")
-            code.append("sw $t0, 4($sp)\t# copy param value to stack")
-            if expression.evaluate_type(symbol_table) == int:
-                code.append(f"jal PrintInt")
-            elif expression.evaluate_type(symbol_table) == str:
-                code.append(f"jal PrintString")
-            elif expression.evaluate_type(symbol_table) == bool:
-                code.append(f"jal PrintBool")
+            expr_type = expression.evaluate_type(symbol_table)
+            size = calc_variable_size(expr_type)
+            code.append(
+                f"subu $sp, $sp, {size}\t# decrement sp to make space for print param"
+            )
+            code.append(f"sw $v0, {size}($sp)\t# copy param value to stack")
+            if expr_type.name == PrimitiveTypes.INT.value:
+                code.append(f"jal _PrintInt")
+            elif expr_type.name == PrimitiveTypes.STRING.value:
+                code.append(f"jal _PrintString")
+            elif expr_type.name == PrimitiveTypes.BOOL.value:
+                code.append(f"jal _PrintBool")
+            elif expr_type.name == PrimitiveTypes.DOUBLE.value:
+                code.append(f"jal _PrintDouble")
+            code.append(generate_clean_param_code(size))
         return code
 
 

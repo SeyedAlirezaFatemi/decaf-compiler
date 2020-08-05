@@ -305,9 +305,8 @@ class DecafTransformer(Transformer):
         # Generate code
         code = []
         for arg in args:
-            # Uncomment if generate_code is implemented in needed models
-            # code_part = arg.generate_code(symbol_table)
-            # code += code_part
-            pass
+            code_part = arg.generate_code(symbol_table)
+            code += code_part
         # Write on file
         # TODO
+        print(code)
