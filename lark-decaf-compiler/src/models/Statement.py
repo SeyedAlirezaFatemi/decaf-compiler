@@ -88,19 +88,20 @@ class ReturnStatement(Statement):
 @dataclass
 class PrintStatement(Statement):
     args: List[Expression]
-‍‍    #we assume the output of expressions are saved in $t0
+
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        code=[]
+        # We assume the output of expressions are saved in $t0
+        code = []
         for expression in self.args:
-            if(expression.evaluate_type(symbol_table)==int):
-                code.append(f"sw      $t0,4 ($fp)")
-                code.append(f"jaal PrintInt")
-            elif(expression.evaluate_type(symbol_table)==str):
-                code.append(f"sw      $t0,4 ($fp)")
-                code.append(f"jaal PrintString")
-            elif(expression.evaluate_type(symbol_table)==bool):
-                code.append(f"sw      $t0,4 ($fp)")
-                code.append(f"jaal PrintBool")
+            code += expression.generate_code(symbol_table)
+            code.append("subu $sp, $sp, 4\t# decrement sp to make space for print param")
+            code.append("sw $t0, 4($sp)\t# copy param value to stack")
+            if expression.evaluate_type(symbol_table) == int:
+                code.append(f"jal PrintInt")
+            elif expression.evaluate_type(symbol_table) == str:
+                code.append(f"jal PrintString")
+            elif expression.evaluate_type(symbol_table) == bool:
+                code.append(f"jal PrintBool")
         return code
 
 
