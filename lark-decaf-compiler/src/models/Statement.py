@@ -87,11 +87,20 @@ class ReturnStatement(Statement):
 @dataclass
 class PrintStatement(Statement):
     args: List[Expression]
-
+‍‍    #we assume the output of expressions are saved in $t0
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        # TODO: generate code for each expression then based on output type call the
-        # print function in standard_library_functions.py
-        pass
+        code=[]
+        for expression in self.args:
+            if(expression.evaluate_type(symbol_table)==int):
+                code.append(f"sw      $t0,4 ($fp)")
+                code.append(f"jaal PrintInt")
+            elif(expression.evaluate_type(symbol_table)==str):
+                code.append(f"sw      $t0,4 ($fp)")
+                code.append(f"jaal PrintString")
+            elif(expression.evaluate_type(symbol_table)==bool):
+                code.append(f"sw      $t0,4 ($fp)")
+                code.append(f"jaal PrintBool")
+        return code
 
 
 @dataclass
