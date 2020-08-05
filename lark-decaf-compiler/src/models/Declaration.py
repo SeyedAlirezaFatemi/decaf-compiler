@@ -40,6 +40,20 @@ class FunctionDeclaration(Declaration):
     body: Statement
     is_method: bool = False
     owner_class: Optional[ClassDeclaration] = None
+    label: str = "UNSPECIFIED"
+
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
+        if self.owner_class is None:
+            self.label = f"{self.identifier.name}_func"
+        else:
+            self.label = (
+                f"{self.owner_class.identifier.name}_{self.identifier.name}_meth"
+            )
+
+        # TODO: add formal parameters to symbol table and generate code
+
+        return code
 
 
 @dataclass

@@ -54,7 +54,6 @@ class UnaryExpression(Expression):
     expression: Expression
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        # TODO: Is this correct?
         if self.operator == Operator.MINUS:
             return self.expression.evaluate_type(symbol_table)
         elif self.operator == Operator.NOT:
@@ -64,7 +63,6 @@ class UnaryExpression(Expression):
 @dataclass
 class ThisExpression(Expression):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        # TODO: Is this correct?
         class_decl = symbol_table.get_current_scope().find_which_class_we_are_in()
         return NamedType(class_decl.identifier.name, class_decl.identifier)
 
@@ -134,8 +132,7 @@ class Assignment(Expression):
     expression: Expression
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        # TODO
-        pass
+        return self.expression.evaluate_type(symbol_table)
 
 
 @dataclass
@@ -148,9 +145,21 @@ class FunctionCall(Call):
     function_identifier: Identifier
     actual_parameters: List[Expression]
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
+        function_decl = self._find_function_decl()
+        function_label = function_decl.label
+        # TODO: call function
+
+        return code
+
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        assert isinstance(self.function_identifier.declaration, FunctionDeclaration)
-        return self.function_identifier.declaration.return_type
+        return self._find_function_decl().return_type
+
+    def _find_function_decl(self) -> FunctionDeclaration:
+        function_decl = self.function_identifier.declaration
+        assert isinstance(function_decl, FunctionDeclaration)
+        return function_decl
 
 
 @dataclass
@@ -161,19 +170,19 @@ class MethodCall(Call):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
-        # TODO
-        # Find class_expression type
-        # the method label in assembly will be "_{class_name}_{method_name}"
-        # call that function
+        method_decl = self._find_method_decl()
+        method_label = method_decl.label
+        # TODO: call method
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        class_type = self.class_expression.evaluate_type(symbol_table)
-        assert isinstance(class_type, NamedType)
-        class_decl = class_type.identifier.declaration
-        assert isinstance(class_decl, ClassDeclaration)
-        method_decl = class_decl.find_method_declaration(self.method_identifier)
-        return method_decl.return_type
+
+        return self._find_method_decl().return_type
+
+    def _find_method_decl(self) -> FunctionDeclaration:
+        method_decl = self.method_identifier.declaration
+        assert isinstance(method_decl, FunctionDeclaration)
+        return method_decl
 
 
 @dataclass
