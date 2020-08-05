@@ -45,7 +45,7 @@ class OptionalExpressionStatement(Statement):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
         if(self.expression!=None):
-            code.append(self.expression.generate_code())
+            code+=self.expression.generate_code()
         return code
 
 
