@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Dict, Optional, List, TYPE_CHECKING
 
+from ..utils import calc_variable_size
+
 if TYPE_CHECKING:
     from .Statement import LoopStatement
-    from .Declaration import Declaration, ClassDeclaration
+    from .Declaration import Declaration, ClassDeclaration, VariableDeclaration
 
 
 class Scope:
@@ -52,6 +54,7 @@ class SymbolTable:
     while_number: int = 0
     else_number: int = 0
     if_number: int = 0
+    local_offset: int = 0
 
     def __init__(self):
         # init global scope
@@ -108,3 +111,25 @@ class SymbolTable:
     def get_current_else_number(self) -> int:
         self.else_number += 1
         return self.else_number
+
+    def reset_local_offset(self):
+        self.local_offset = 0
+
+    def increment_local_offset(self, amount: int):
+        self.local_offset += amount
+
+    def decrement_local_offset(self, amount: int):
+        # Pop
+        self.local_offset -= amount
+
+    def get_local_offset(self) -> int:
+        return self.local_offset
+
+    def pop_variables_till_block(self, scope: Scope, block_scope: Scope):
+        if scope == block_scope:
+            return
+        for decl in scope.name_declaration_map.values():
+            assert isinstance(decl, VariableDeclaration)
+            # Pop variables
+            self.decrement_local_offset(calc_variable_size(decl.variable_type))
+        self.pop_variables_till_block(scope.parent_scope, block_scope)

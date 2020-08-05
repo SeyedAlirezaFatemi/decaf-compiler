@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, TYPE_CHECKING, Optional
 
+from ..utils import calc_variable_size
 from .Identifier import Identifier
 from .Node import Node
 
@@ -21,15 +22,19 @@ class Declaration(Node):
 class VariableDeclaration(Declaration):
     variable_type: Type
     is_global: bool = False
+    global_offset: int = 0
     is_class_member: bool = False
     class_member_offset: int = 0
     is_function_parameter: bool = False
     function_parameter_offset: int = 0
+    local_offset: int = 0
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         current_scope = symbol_table.enter_new_scope()
         current_scope.add_declaration(self)
-        # TODO: Do we need to generate code?
+        if not (self.is_global or self.is_class_member or self.is_function_parameter):
+            self.local_offset = symbol_table.get_local_offset()
+            symbol_table.increment_local_offset(calc_variable_size(self.variable_type))
         return []
 
 
@@ -44,6 +49,8 @@ class FunctionDeclaration(Declaration):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
+        # Reset local offset for correct local variable addressing
+        symbol_table.reset_local_offset()
         if self.owner_class is None:
             self.label = f"{self.identifier.name}_func"
         else:
@@ -53,6 +60,7 @@ class FunctionDeclaration(Declaration):
 
         # TODO: add formal parameters to symbol table and generate code
 
+        symbol_table.reset_local_offset()
         return code
 
 

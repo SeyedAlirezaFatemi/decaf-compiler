@@ -3,11 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional, TYPE_CHECKING, Union
 
+from .Declaration import VariableDeclaration
 from .Node import Node
 
 if TYPE_CHECKING:
     from .SymbolTable import SymbolTable
-    from .Declaration import VariableDeclaration
     from .Expression import Expression
 
 
@@ -28,6 +28,10 @@ class StatementBlock(Statement):
             code += var_decl.generate_code(symbol_table)
         for statement in self.statements:
             code += statement.generate_code(symbol_table)
+        # Pop variables in order to correct local offset
+        symbol_table.pop_variables_till_block(
+            symbol_table.get_current_scope(), statement_block_scope
+        )
         # Clean block scope cause we are out of the block
         symbol_table.set_current_scope(statement_block_scope.parent_scope)
         return code

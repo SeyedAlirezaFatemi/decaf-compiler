@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, List
 
-from .Declaration import ClassDeclaration, FunctionDeclaration
+from .Declaration import ClassDeclaration, FunctionDeclaration, VariableDeclaration
 from .Identifier import Identifier
 from .Node import Node
 from .Type import Type, PrimitiveTypes, NamedType, ArrayType
@@ -98,6 +98,22 @@ class LValue(Expression):
 class IdentifierLValue(LValue):
     identifier: Identifier
 
+    def calculate_address(self, symbol_table: SymbolTable):
+        decl = self.identifier.declaration
+        assert isinstance(decl, VariableDeclaration)
+        if decl.is_class_member:
+            # TODO: use this to calc address
+            decl.class_member_offset
+        elif decl.is_function_parameter:
+            # TODO: use this to calc address
+            decl.function_parameter_offset
+        elif decl.is_global:
+            # TODO: use this to calc address
+            decl.global_offset
+        else:
+            # TODO: use this to calc address
+            decl.local_offset
+
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.identifier.evaluate_type(symbol_table)
 
@@ -176,7 +192,6 @@ class MethodCall(Call):
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-
         return self._find_method_decl().return_type
 
     def _find_method_decl(self) -> FunctionDeclaration:

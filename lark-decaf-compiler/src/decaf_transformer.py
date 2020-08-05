@@ -2,6 +2,7 @@ from typing import List
 
 from lark import Transformer
 
+from .utils import calc_variable_size
 from .models.Declaration import (
     FunctionDeclaration,
     VariableDeclaration,
@@ -85,8 +86,7 @@ class DecafTransformer(Transformer):
         for idx, formal_parameter in enumerate(function_declaration.formal_parameters):
             formal_parameter.is_function_parameter = True
             formal_parameter.function_parameter_offset = offset
-            # TODO: This addition should be based on formal_parameter.variable_type
-            offset += 4
+            offset += calc_variable_size(formal_parameter.variable_type)
         return function_declaration
 
     def new_void_function(self, args):
@@ -113,12 +113,11 @@ class DecafTransformer(Transformer):
         method_declarations = []
         class_member_offset = 0
         for field in fields_declarations:
-            if type(field) == VariableDeclaration:
+            if isinstance(field, VariableDeclaration):
                 variable_declarations.append(field)
                 field.is_class_member = True
                 field.class_member_offset = class_member_offset
-                # TODO: This addition should be based on field.variable_type
-                class_member_offset += 0  # Variable size
+                class_member_offset += calc_variable_size(field.variable_type)
             else:
                 method_declarations.append(field)
                 field.is_method = True
@@ -291,14 +290,20 @@ class DecafTransformer(Transformer):
         symbol_table = SymbolTable()
         # First Pass
         # Initialize global scope
+        variable_global_offset = 0
         for arg in args:
             symbol_table.add_declaration_to_global_scope(arg)
+            if isinstance(arg, VariableDeclaration):
+                arg.is_global = True
+                arg.global_offset = variable_global_offset
+                variable_type = arg.variable_type
+                variable_global_offset += calc_variable_size(variable_type)
         # Second Pass
         # Generate code
-        code = ""
+        code = []
         for arg in args:
             # Uncomment if generate_code is implemented in needed models
-            # code_part, symbol_table = arg.generate_code(symbol_table)
+            # code_part = arg.generate_code(symbol_table)
             # code += code_part
             pass
         # Write on file
