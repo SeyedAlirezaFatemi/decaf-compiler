@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Union, Tuple
 
 from .Declaration import ClassDeclaration, FunctionDeclaration, VariableDeclaration
 from .Identifier import Identifier
@@ -14,6 +14,7 @@ from ..utils import (
     push_to_stack,
     pop_double_to_femp,
     push_double_to_stack,
+    ARRAY_LENGTH_SIZE,
 )
 
 if TYPE_CHECKING:
@@ -134,9 +135,9 @@ class BinaryExpression(Expression):
                 code += pop_double_to_femp(0)
                 code += pop_double_to_femp(2)
                 code.append("c.le.d $f2,$f0")
-                code.append(f'bc1f __double_le__{counter}')
-                code.append('li $t0, 1')
-                code.append(f'__double_le__{counter}:')
+                code.append(f"bc1f __double_le__{counter}")
+                code.append("li $t0, 1")
+                code.append(f"__double_le__{counter}:")
                 code += push_to_stack(0)
         elif self.operator == Operator.LT:
             if operand_type == "int":
@@ -149,9 +150,9 @@ class BinaryExpression(Expression):
                 code += pop_double_to_femp(0)
                 code += pop_double_to_femp(2)
                 code.append("c.lt.d $f2,$f0")
-                code.append(f'bc1f __double_le__{counter}')
-                code.append('li $t0, 1')
-                code.append(f'__double_le__{counter}:')
+                code.append(f"bc1f __double_le__{counter}")
+                code.append("li $t0, 1")
+                code.append(f"__double_le__{counter}:")
                 code += push_to_stack(0)
         elif self.operator == Operator.GTE:
             if operand_type == "int":
@@ -164,9 +165,9 @@ class BinaryExpression(Expression):
                 code += pop_double_to_femp(0)
                 code += pop_double_to_femp(2)
                 code.append("c.lt.d $f2,$f0")
-                code.append(f'bc1t __double_le__{counter}')
-                code.append('li $t0, 1')
-                code.append(f'__double_le__{counter}:')
+                code.append(f"bc1t __double_le__{counter}")
+                code.append("li $t0, 1")
+                code.append(f"__double_le__{counter}:")
                 code += push_to_stack(0)
         elif self.operator == Operator.GT:
             if operand_type == "int":
@@ -179,9 +180,9 @@ class BinaryExpression(Expression):
                 code += pop_double_to_femp(0)
                 code += pop_double_to_femp(2)
                 code.append("c.le.d $f2,$f0")
-                code.append(f'bc1t __double_le__{counter}')
-                code.append('li $t0, 1')
-                code.append(f'__double_le__{counter}:')
+                code.append(f"bc1t __double_le__{counter}")
+                code.append("li $t0, 1")
+                code.append(f"__double_le__{counter}:")
                 code += push_to_stack(0)
         elif self.operator == Operator.AND:
             code += pop_to_temp(0)
@@ -199,14 +200,14 @@ class BinaryExpression(Expression):
                 code += pop_to_temp(1)
                 code.append("seq $t2,$t1,$t0")
                 code += push_to_stack(2)
-            elif operand_type == 'double':
+            elif operand_type == "double":
                 counter = symbol_table.get_label()
                 code += pop_double_to_femp(0)
                 code += pop_double_to_femp(2)
                 code.append("c.eq.d $f2,$f0")
-                code.append(f'bc1f __double_le__{counter}')
-                code.append('li $t0, 1')
-                code.append(f'__double_le__{counter}:')
+                code.append(f"bc1f __double_le__{counter}")
+                code.append("li $t0, 1")
+                code.append(f"__double_le__{counter}:")
                 code += push_to_stack(0)
             # else:
         elif self.operator == Operator.NOT_EQUALS:  # TODO: String
@@ -215,14 +216,14 @@ class BinaryExpression(Expression):
                 code += pop_to_temp(1)
                 code.append("sne $t2,$t1,$t0")
                 code += push_to_stack(2)
-            elif operand_type == 'double':
+            elif operand_type == "double":
                 counter = symbol_table.get_label()
                 code += pop_double_to_femp(0)
                 code += pop_double_to_femp(2)
                 code.append("c.eq.d $f2,$f0")
-                code.append(f'bc1t __double_le__{counter}')
-                code.append('li $t0, 1')
-                code.append(f'__double_le__{counter}:')
+                code.append(f"bc1t __double_le__{counter}")
+                code.append("li $t0, 1")
+                code.append(f"__double_le__{counter}:")
                 code += push_to_stack(0)
             # else:
 
@@ -294,7 +295,7 @@ class ReadLine(Expression):
 
 @dataclass
 class LValue(Expression):
-    def calculate_address(self, symbol_table: SymbolTable) -> str:
+    def calculate_address(self, symbol_table: SymbolTable) -> Tuple[List[str], str]:
         pass
 
 
@@ -307,23 +308,27 @@ OFFSET_TO_FIRST_GLOBAL = 0
 class IdentifierLValue(LValue):
     identifier: Identifier
 
-    def calculate_address(self, symbol_table: SymbolTable) -> str:
+    def calculate_address(self, symbol_table: SymbolTable) -> Tuple[List[str], str]:
         """
         In a MIPS stack frame, first local is at fp-8, subsequent locals are at fp-12, fp-16, and so on.
         The first param is at fp+4, subsequent ones as fp+8, fp+12, etc. (Because methods have secret
         "this" passed in first param slot at fp+4, all normal params are shifted up by 4.)
         """
+        code = []
         decl = self.identifier.find_declaration(symbol_table)
         assert isinstance(decl, VariableDeclaration)
         if decl.is_class_member:
             # TODO: use this to calc address. use vtable.
             decl.class_member_offset
         elif decl.is_function_parameter:
-            return f"{OFFSET_TO_FIRST_PARAM + decl.function_parameter_offset}($fp)"
+            return (
+                code,
+                f"{OFFSET_TO_FIRST_PARAM + decl.function_parameter_offset}($fp)",
+            )
         elif decl.is_global:
-            return f"{OFFSET_TO_FIRST_GLOBAL - decl.global_offset}($gp)"
+            return code, f"{OFFSET_TO_FIRST_GLOBAL - decl.global_offset}($gp)"
         else:
-            return f"{OFFSET_TO_FIRST_LOCAL - decl.local_offset}($fp)"
+            return code, f"{OFFSET_TO_FIRST_LOCAL - decl.local_offset}($fp)"
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.identifier.evaluate_type(symbol_table)
@@ -352,18 +357,39 @@ class ArrayAccessLValue(LValue):
         assert isinstance(array_type, ArrayType)
         return array_type.element_type
 
-    def generate_code(self, symbol_table: SymbolTable):
+    def calculate_address(self, symbol_table: SymbolTable) -> Tuple[List[str], str]:
+        array_type = self.array_expression.evaluate_type(symbol_table)
+        assert isinstance(array_type, ArrayType)
+        array_element_size = calc_variable_size(array_type.element_type)
         code = self.array_expression.generate_code(symbol_table)
-        code += pop_to_temp(0)
+        code += pop_to_temp(0)  # array address at $t0
         code += self.index_expression.generate_code(symbol_table)
-        code += pop_to_temp(1)
-        code.append("sll $t1,$t1,2")
-        code.append("addu $t2,$t1,$t0")
-        if self.array_expression.evaluate_type(symbol_table) == "int":
-            code.append("lw $t0, 0($t2)")
+        code += pop_to_temp(1)  # index at $t0
+        code.append(f"\tsll $t1,$t1,{array_element_size}")
+        code.append(
+            f"\taddi $t1, $t1, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array"
+        )
+        code.append("\taddu $t2,$t1,$t0\t# address of element is now in $t2")
+        return code, "$t2"
+
+    def generate_code(self, symbol_table: SymbolTable):
+        array_type = self.array_expression.evaluate_type(symbol_table)
+        assert isinstance(array_type, ArrayType)
+        array_element_size = calc_variable_size(array_type.element_type)
+        code = self.array_expression.generate_code(symbol_table)
+        code += pop_to_temp(0)  # array address at $t0
+        code += self.index_expression.generate_code(symbol_table)
+        code += pop_to_temp(1)  # index at $t0
+        code.append(f"\tsll $t1,$t1,{array_element_size}")
+        code.append(
+            f"\taddi $t1, $t1, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array"
+        )
+        code.append("\taddu $t2,$t1,$t0\t# address of element is now in $t2")
+        if array_type.element_type == "int":
+            code.append("\tlw $t0, 0($t2)")
             code += push_to_stack(0)
-        elif self.array_expression.evaluate_type(symbol_table) == 'double':
-            code.append("l.d $f0, 0($t2)")
+        elif array_type.element_type == "double":
+            code.append("\tl.d $f0, 0($t2)")
             code += push_double_to_stack(0)
         return code
 
@@ -378,13 +404,16 @@ class Assignment(Expression):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = self.expression.generate_code(symbol_table)
-        if self.expression.evaluate_type(symbol_table) == 'int':
+        if self.expression.evaluate_type(symbol_table) == "int":
             code += pop_to_temp(0)
-            code.append("sw $t0," + self.l_value.calculate_address(symbol_table))
-        elif self.expression.evaluate_type(symbol_table) == 'double':
+            l_value_code, l_value_address = self.l_value.calculate_address(symbol_table)
+            code += l_value_code
+            code.append(f"\tsw $t0, {l_value_address}\t# assignment")
+        elif self.expression.evaluate_type(symbol_table) == "double":
             code += pop_double_to_femp(0)
-            code.append("s.d $f0," + self.l_value.calculate_address(symbol_table))
-        # TODO: do we need to generate code for lvalue? I don't think so...
+            l_value_code, l_value_address = self.l_value.calculate_address(symbol_table)
+            code += l_value_code
+            code.append(f"\ts.d $f0, {l_value_address}\t# assignment")
         return code
 
 
@@ -458,7 +487,7 @@ class InitiateArray(Expression):
         code += [
             "\tmove $a0, $t0\t# move array length to $a0",
             f"\tsll $a0, $a0, {type_size}\t# size of array = length * type_size",
-            "\taddi $a0, $a0, 4 # extra 4 bytes for length of array",
+            f"\taddi $a0, $a0, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array",
             "\tli $v0, 9\t#rsbrk",
             "\tsyscall",
             "\tsw $t0 0($v0)\t# copy array length to the start of array",

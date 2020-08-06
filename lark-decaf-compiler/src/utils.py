@@ -2,6 +2,8 @@ from typing import List
 
 from .models.Type import Type, PrimitiveTypes
 
+ARRAY_LENGTH_SIZE = 4
+
 
 def calc_variable_size(variable_type: Type):
     if variable_type == PrimitiveTypes.DOUBLE:
