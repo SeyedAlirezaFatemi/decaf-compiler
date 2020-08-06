@@ -19,7 +19,7 @@ _PrintDouble:
         addiu   $fp, $sp, 8
         
         li      $v0, 3
-        l.s     $f12, 4($fp)    # load double value to $f12
+        l.d     $f12, 8($fp)    # load double value to $f12
         syscall
         
         move    $sp, $fp

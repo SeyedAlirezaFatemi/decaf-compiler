@@ -285,10 +285,18 @@ class Constant(Expression):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         size = calc_variable_size(self.constant_type)
         code = [
-            f"\tsubu $sp, $sp, {size}\t# decrement sp to make space for constant {self.value}",
-            f"\tli $t0, {self.value}\t# load constant value to $t0",
-            f"\tsw $t0, {size}($sp)\t# load constant value from $to to {size}($sp)"
+            f"\tsubu $sp, $sp, {size}\t# decrement sp to make space for constant {self.value}"
         ]
+        if self.constant_type == PrimitiveTypes.DOUBLE:
+            code += [
+                f"\tli.d $f12, {self.value}\t# load constant value to $f12",
+                f"\ts.d $f12, {size}($sp)\t# load constant value from $f12 to {size}($sp)",
+            ]
+        else:
+            code += [
+                f"\tli $t0, {self.value}\t# load constant value to $t0",
+                f"\tsw $t0, {size}($sp)\t# load constant value from $to to {size}($sp)",
+            ]
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
