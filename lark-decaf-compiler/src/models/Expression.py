@@ -370,7 +370,7 @@ class ArrayAccessLValue(LValue):
             f"\taddi $t1, $t1, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array"
         )
         code.append("\taddu $t2,$t1,$t0\t# address of element is now in $t2")
-        return code, "$t2"
+        return code, "0($t2)"
 
     def generate_code(self, symbol_table: SymbolTable):
         array_type = self.array_expression.evaluate_type(symbol_table)

@@ -23,6 +23,8 @@ from .models.Expression import (
     MethodCall,
     Operator,
     Constant,
+    InitiateArray,
+    InitiateClass,
 )
 from .models.Identifier import Identifier
 from .models.Statement import (
@@ -316,6 +318,14 @@ class DecafTransformer(Transformer):
 
     def read_line(self, args):
         return ReadLine()
+
+    def initiate_array(self, args):
+        length_expression, element_type = args
+        return InitiateArray(length_expression, element_type)
+
+    def initiate_class(self, args):
+        class_identifier = args[0]
+        return InitiateClass(class_identifier)
 
     def finalize(self, args: List[Declaration]):
         symbol_table = SymbolTable()
