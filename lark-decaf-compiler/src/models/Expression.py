@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 from .Declaration import ClassDeclaration, FunctionDeclaration, VariableDeclaration
 from .Identifier import Identifier
@@ -274,3 +274,12 @@ class InitiateArray(Expression):
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return ArrayType(self.element_type)
+
+
+@dataclass
+class Constant(Expression):
+    constant_type: Type
+    value: Union[bool, str, int, float]
+
+    def evaluate_type(self, symbol_table: SymbolTable) -> Type:
+        return self.constant_type
