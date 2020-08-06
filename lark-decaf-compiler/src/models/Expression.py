@@ -424,7 +424,7 @@ class Assignment(Expression):
             code += l_value_code
             code += pop_double_to_femp(0)  # expression result
             code.append(f"\ts.d $f0, {l_value_address}\t# assignment")
-        else:
+        else:  # TODO: Is this right?
             l_value_code, l_value_address = self.l_value.calculate_address(symbol_table)
             code += l_value_code
             code += pop_to_temp(0)  # expression result
