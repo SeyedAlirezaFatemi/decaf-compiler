@@ -51,10 +51,16 @@ class BinaryExpression(Expression):
     right_expression: Expression
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        if self.operator in [Operator.AND, Operator.OR,
-                             Operator.LT, Operator.LTE,
-                             Operator.GT, Operator.GTE,
-                             Operator.EQUALS, Operator.NOT_EQUALS]:
+        if self.operator in [
+            Operator.AND,
+            Operator.OR,
+            Operator.LT,
+            Operator.LTE,
+            Operator.GT,
+            Operator.GTE,
+            Operator.EQUALS,
+            Operator.NOT_EQUALS,
+        ]:
             return Type(PrimitiveTypes.BOOL.value)
         else:
             return self.left_expression.evaluate_type(symbol_table)
@@ -247,6 +253,10 @@ class ReadInteger(Expression):
 class ReadLine(Expression):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = [f"\tjal _ReadLine"]
+        code += [
+            f"\tsubu $sp,$sp,4\t# make space for string pointer",
+            f"\tsw $v0,4($sp)\t#copy string pointer to stack",
+        ]
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
@@ -396,6 +406,24 @@ class InitiateClass(Expression):
 class InitiateArray(Expression):
     length_expression: Expression
     element_type: Type
+
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        type_size = calc_variable_size(self.element_type)
+        code = []
+        code += self.length_expression.generate_code(symbol_table)
+        code += pop_to_temp(0)  # now array size is in t0
+        code += [
+            "\tmove $a0, $t0\t# move array length to $a0",
+            f"\tsll $a0, $a0, {type_size}\t# size of array = length * type_size",
+            "\taddi $a0, $a0, 4 # extra 4 bytes for length of array",
+            "\tli $v0, 9\t#rsbrk",
+            "\tsyscall",
+            "\tsw $t0 0($v0)\t# copy array length to the start of array",
+            # "\taddi $v0, $v0, 4\t# move array pointer after length",
+            "\tsub $sp, $sp, 4\t# make space for array pointer",
+            "\tsw $v0, 4($sp)\t# save array pointer to stack",
+        ]
+        return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return ArrayType(self.element_type)
