@@ -284,7 +284,7 @@ class IdentifierLValue(LValue):
         The first param is at fp+4, subsequent ones as fp+8, fp+12, etc. (Because methods have secret
         "this" passed in first param slot at fp+4, all normal params are shifted up by 4.)
         """
-        decl = self.identifier.declaration
+        decl = self.identifier.find_declaration(symbol_table)
         assert isinstance(decl, VariableDeclaration)
         if decl.is_class_member:
             # TODO: use this to calc address. use vtable.

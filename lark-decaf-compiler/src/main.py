@@ -64,10 +64,9 @@ class HELLO{}
     tree = decaf_parser.parse(
         """
     int main() {
-        while (true) {
-            Print(ReadLine());
-            break;
-        }
+        int a;
+        a = 2;
+        Print(a);
     }
 """
     )

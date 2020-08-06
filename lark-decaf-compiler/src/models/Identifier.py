@@ -17,10 +17,16 @@ class Identifier(Node):
     declaration: Optional[Declaration] = None
     new: bool = False
 
+    def find_declaration(self, symbol_table: SymbolTable) -> Declaration:
+        return symbol_table.get_current_scope().lookup(self.name)
+
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         from .Declaration import VariableDeclaration
 
-        if isinstance(self.declaration, VariableDeclaration):
+        if self.declaration is not None and isinstance(self.declaration, VariableDeclaration):
             return self.declaration.variable_type
+        decl = self.find_declaration(symbol_table)
+        if isinstance(decl, VariableDeclaration):
+            return decl.variable_type
         # Well...
         # What about the others?
