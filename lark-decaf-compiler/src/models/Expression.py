@@ -57,7 +57,7 @@ class BinaryExpression(Expression):
                              Operator.EQUALS, Operator.NOT_EQUALS]:
             return Type(PrimitiveTypes.BOOL.value)
         else:
-            return self.expression.evaluate_type(symbol_table)
+            return self.left_expression.evaluate_type(symbol_table)
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
