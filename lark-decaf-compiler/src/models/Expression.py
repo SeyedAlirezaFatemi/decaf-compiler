@@ -283,6 +283,18 @@ OFFSET_TO_FIRST_GLOBAL = 0
 class IdentifierLValue(LValue):
     identifier: Identifier
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        address = self.calculate_address(symbol_table)
+        size = calc_variable_size(self.identifier.evaluate_type(symbol_table))
+        code = [
+            f"\t### Loading {self.identifier.name} value to stack ###",
+            f"\tsubu $sp,$sp,{size}\t# move sp down cause of load l_value {self.identifier.name}",
+            f"\tlw $t4, {address}\t# copy {address} to t10",
+            f"\tsw $t4,{size}($sp)\t# copy $t10 to stack",
+            f"\t### Done loading {self.identifier.name} value to stack ###",
+        ]
+        return code
+
     def calculate_address(self, symbol_table: SymbolTable) -> str:
         """
         In a MIPS stack frame, first local is at fp-8, subsequent locals are at fp-12, fp-16, and so on.

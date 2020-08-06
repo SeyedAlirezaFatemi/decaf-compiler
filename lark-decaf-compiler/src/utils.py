@@ -17,22 +17,34 @@ def generate_clean_param_code(params_size: int) -> str:
 
 
 def pop_to_temp(t_num: int = 0, size: int = 4) -> List[str]:
-    code = [f"lw $t{t_num},{size}($sp)", f"addu $sp,$sp,{size}"]
+    code = [
+        f"\tlw $t{t_num},{size}($sp)\t#copy top stack to t{t_num}",
+        f"\taddu $sp,$sp,{size}\t# move sp higher cause of pop",
+    ]
     return code
 
 
 def push_to_stack(t_num: int = 0, size: int = 4) -> List[str]:
-    code = [f"subu $sp,$sp,{size}", f"sw $t{t_num},{size}($sp)"]
+    code = [
+        f"\tsubu $sp,$sp,{size}\t# move sp down cause of push",
+        f"\tsw $t{t_num},{size}($sp)\t#copy t{t_num} to stack",
+    ]
     return code
 
 
 def pop_double_to_femp(f_num: int = 0, size: int = 8) -> List[str]:
-    code = [f"l.d $f{f_num},{size}($sp)", f"addu $sp,$sp,{size}"]
+    code = [
+        f"\tl.d $f{f_num},{size}($sp)#move top stack to f{f_num}",
+        f"\taddu $sp,$sp,{size}\t# move sp higher cause of pop",
+    ]
     return code
 
 
 def push_double_to_stack(f_num: int = 0, size: int = 8) -> List[str]:
-    code = [f"subu $sp,$sp,{size}", f"s.d $f{f_num},{size}($sp)"]
+    code = [
+        f"\tsubu $sp,$sp,{size}\t# move sp down cause of push",
+        f"\ts.d $f{f_num},{size}($sp)\t#copy f{f_num} to stack",
+    ]
     return code
 
 
