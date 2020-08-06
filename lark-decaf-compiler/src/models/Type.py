@@ -15,6 +15,7 @@ class PrimitiveTypes(Enum):
     DOUBLE = "double"
     BOOL = "bool"
     STRING = "string"
+    NULL = "null"
 
 
 PRIMITIVE_TYPES = {"int", "double", "bool", "string"}

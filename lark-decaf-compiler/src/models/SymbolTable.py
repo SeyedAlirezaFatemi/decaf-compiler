@@ -12,19 +12,16 @@ if TYPE_CHECKING:
 class Scope:
     name_declaration_map: Dict[str, Declaration]
     parent_scope: Optional[Scope]
-    owner_class_name: Optional[str]
-    parent_class_name: Optional[str]
+    owner_class_declaration: Optional[ClassDeclaration]
 
     def __init__(
         self,
         parent_scope: Optional[Scope] = None,
-        owner_class_name: Optional[str] = None,
-        parent_class_name: Optional[str] = None,
+        owner_class_declaration: Optional[ClassDeclaration] = None,
     ):
         self.name_declaration_map = dict()
         self.parent_scope = parent_scope
-        self.parent_class_name = parent_class_name
-        self.owner_class_name = owner_class_name
+        self.owner_class_declaration = owner_class_declaration
 
     def lookup(self, name) -> Declaration:
         if name in self.name_declaration_map:
@@ -38,18 +35,18 @@ class Scope:
         self.name_declaration_map[declaration.identifier.name] = declaration
 
     def find_which_class_we_are_in(self) -> ClassDeclaration:
-        if self.owner_class_name is not None:
-            return self.lookup(self.owner_class_name)
-        if self.parent_scope is None:
-            print("Error")
-        return self.parent_scope.find_which_class_we_are_in()
+        if self.owner_class_declaration is not None:
+            return self.owner_class_declaration
+        elif self.parent_scope is not None:
+            return self.parent_scope.find_which_class_we_are_in()
+        print("Error. You are not inside a class.")
 
 
 class SymbolTable:
     global_scope: Scope
     current_scope: Scope
     # This is for keeping track of the loop statements we are inside so we can break out easily
-    exterior_loop_statements: List[LoopStatement]
+    exterior_loop_statements: List[LoopStatement] = []
     for_number: int = 0
     while_number: int = 0
     else_number: int = 0
@@ -79,8 +76,10 @@ class SymbolTable:
     def set_current_scope(self, scope: Scope):
         self.current_scope = scope
 
-    def enter_new_scope(self, owner_class_name: Optional[str] = None) -> Scope:
-        new_scope = Scope(self.current_scope, owner_class_name=owner_class_name)
+    def enter_new_scope(
+        self, owner_class_declaration: Optional[ClassDeclaration] = None
+    ) -> Scope:
+        new_scope = Scope(self.current_scope, owner_class_declaration)
         self.current_scope = new_scope
         return new_scope
 

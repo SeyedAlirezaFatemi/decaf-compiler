@@ -53,14 +53,12 @@ class HELLO{}
     class HELLO{
         int getAge() {}
     }
-    /* int getAge() {
-        a.a();
+    int getAge() {
         for (;x<0;){
         }
-        //Print(1, 2, 3);
-        //return;
-    } */
-    
+        Print(1, 2, 3);
+        return;
+    }
 """
     )
     DecafTransformer().transform(tree)

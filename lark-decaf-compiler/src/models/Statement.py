@@ -115,6 +115,7 @@ class PrintStatement(Statement):
         # We assume the output of expressions are saved in $v0
         code = []
         for expression in self.args:
+            print(self.args)
             code += expression.generate_code(symbol_table)
             expr_type = expression.evaluate_type(symbol_table)
             size = calc_variable_size(expr_type)
