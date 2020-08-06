@@ -20,7 +20,8 @@ from .models.Expression import (
     Assignment,
     FunctionCall,
     MethodCall,
-    Operator, Constant,
+    Operator,
+    Constant,
 )
 from .models.Identifier import Identifier
 from .models.Statement import (
@@ -301,7 +302,6 @@ class DecafTransformer(Transformer):
         return FunctionCall(function_identifier, actual_parameters)
 
     def method_call(self, args):
-        print(args)
         class_expression, method_identifier, actual_parameters = args
         return MethodCall(class_expression, method_identifier, actual_parameters)
 
@@ -335,5 +335,5 @@ class DecafTransformer(Transformer):
             code_part = arg.generate_code(symbol_table)
             code += code_part
         # Write on file
-        # TODO
-        print(code)
+        with open("out.asm", "w") as f:
+            print("\n".join(code), file=f)

@@ -8,7 +8,7 @@ from .Node import Node
 from ..utils import calc_variable_size
 
 if TYPE_CHECKING:
-    from .Statement import Statement, StatementBlock
+    from .Statement import StatementBlock
     from .SymbolTable import SymbolTable
     from .Type import Type
 
@@ -64,6 +64,7 @@ class FunctionDeclaration(Declaration):
         for param in self.formal_parameters:
             function_scope.add_declaration(param)
         code = [
+            f"{self.label}:",
             "subu $sp, $sp, 8\t# decrement sp to make space to save ra, fp",
             "sw $fp, 8($sp)\t# save fp",
             "sw $ra, 4($sp)\t# save ra",
