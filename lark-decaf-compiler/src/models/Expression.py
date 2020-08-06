@@ -36,25 +36,30 @@ class Expression(Node):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         pass
 
-def spop(self, num):
+
+def spop(num):
     code = [f"lw   $t{num},0($sp)"]
     code.append("addu $sp,$sp,4")
     return code
 
-def spush(self, num):
+
+def spush(num):
     code = ["subu $sp,$sp,4"]
     code.append(f"sw   $t{num},0($sp)")
     return code
 
-def spop_double(self, num):
+
+def spop_double(num):
     code = [f"l.d   $f{num},0($sp)"]
     code.append("addu $sp,$sp,8")
     return code
 
-def spush_double(self, num):
+
+def spush_double(num):
     code = ["subu $sp,$sp,8"]
     code.append(f"s.d   $f{num},0($sp)")
     return code
+
 
 @dataclass
 class BinaryExpression(Expression):
@@ -65,34 +70,35 @@ class BinaryExpression(Expression):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         # TODO: based on operators and left and right expression
         pass
-    
+
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
-        code += left_expression.generate_code()
-        code += right_expression.generate_code()
-        if operator == Operator.ADDITION:
-            if self.evaluate_type(SymbolTable) == 'int':
+        code += self.left_expression.generate_code(symbol_table)
+        code += self.right_expression.generate_code(symbol_table)
+        if self.operator == Operator.ADDITION:
+            if self.evaluate_type(symbol_table) == "int":
                 code += spop(0)
                 code += spop(1)
-                code.append('addu $t0,$t0,$t1')
+                code.append("addu $t0,$t0,$t1")
                 code += spush(0)
             else:
                 code += spop_double(0)
                 code += spop_double(2)
-                code.append('add.d $f4, $f2, $f0')
+                code.append("add.d $f4, $f2, $f0")
                 code += spush_double(4)
-        elif operator == Operator.MINUS:
-            if self.evaluate_type(SymbolTable) == 'int':
+        elif self.operator == Operator.MINUS:
+            if self.evaluate_type(symbol_table) == "int":
                 code += spop(0)
                 code += spop(1)
-                code.append('sub $t0,$t0,$t1')
+                code.append("sub $t0,$t0,$t1")
                 code += spush(0)
             else:
                 code += spop_double(0)
                 code += spop_double(2)
-                code.append('sub.d $f4, $f2, $f0')
+                code.append("sub.d $f4, $f2, $f0")
                 code += spush_double(4)
         return code
+
 
 @dataclass
 class UnaryExpression(Expression):
