@@ -173,10 +173,11 @@ class ForStatement(Statement):
         code.append(f"{self.start_label}:")
         code += self.condition_expression.generate_code(symbol_table)
         code += pop_to_temp(1)
-        code.append(f"beqz $t1,{self.end_label}")
+        code.append(f"\tbeqz $t1,{self.end_label}")
         code += self.body_statement.generate_code(symbol_table)
         if self.update_expression is not None:
             code += self.update_expression.generate_code(symbol_table)
+        code.append(f"\tj {self.start_label}\t# back to start of for")
         code.append(f"{self.end_label}:")
 
         symbol_table.exit_loop()
