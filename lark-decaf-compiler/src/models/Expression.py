@@ -123,7 +123,7 @@ class BinaryExpression(Expression):
             code.append("div $t2,$t1,$t0")
             code.append("mfhi $t2")
             code += push_to_stack(2)
-        elif self.operator == Operator.LTE:  # TODO: double
+        elif self.operator == Operator.LTE:
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
@@ -138,39 +138,51 @@ class BinaryExpression(Expression):
                 code.append('li $t0, 1')
                 code.append(f'__double_le__{counter}:')
                 code += push_to_stack(0)
-        elif self.operator == Operator.LT:  # TODO: double
+        elif self.operator == Operator.LT:
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("slt $t2,$t1,$t0")
                 code += push_to_stack(2)
-            # else:
-            #     code += spop_double(0)
-            #     code += spop_double(2)
-            #     code.append()
-            #     code += spush_double(4)
-        elif self.operator == Operator.GTE:  # TODO: double
+            else:
+                counter = symbol_table.get_label()
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
+                code.append("c.lt.d $f2,$f0")
+                code.append(f'bc1f __double_le__{counter}')
+                code.append('li $t0, 1')
+                code.append(f'__double_le__{counter}:')
+                code += push_to_stack(0)
+        elif self.operator == Operator.GTE:
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("sge $t2,$t1,$t0")
                 code += push_to_stack(2)
-            # else:
-            #     code += spop_double(0)
-            #     code += spop_double(2)
-            #     code.append()
-            #     code += spush_double(4)
-        elif self.operator == Operator.GT:  # TODO: double
+            else:
+                counter = symbol_table.get_label()
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
+                code.append("c.lt.d $f2,$f0")
+                code.append(f'bc1t __double_le__{counter}')
+                code.append('li $t0, 1')
+                code.append(f'__double_le__{counter}:')
+                code += push_to_stack(0)
+        elif self.operator == Operator.GT:
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("sgt $t2,$t1,$t0")
                 code += push_to_stack(2)
-            # else:
-            #     code += spop_double(0)
-            #     code += spop_double(2)
-            #     code.append()
-            #     code += spush_double(4)
+            else:
+                counter = symbol_table.get_label()
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
+                code.append("c.le.d $f2,$f0")
+                code.append(f'bc1t __double_le__{counter}')
+                code.append('li $t0, 1')
+                code.append(f'__double_le__{counter}:')
+                code += push_to_stack(0)
         elif self.operator == Operator.AND:
             code += pop_to_temp(0)
             code += pop_to_temp(1)
@@ -181,29 +193,37 @@ class BinaryExpression(Expression):
             code += pop_to_temp(1)
             code.append("or $t2,$t1,$t0")
             code += push_to_stack(2)
-        elif self.operator == Operator.EQUALS:  # TODO: String and Double
+        elif self.operator == Operator.EQUALS:  # TODO: String
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("seq $t2,$t1,$t0")
                 code += push_to_stack(2)
-            # elif operand_type == 'double':
-            #     code += spop_double(0)
-            #     code += spop_double(2)
-            #     code.append()
-            #     code += spush_double(4)
+            elif operand_type == 'double':
+                counter = symbol_table.get_label()
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
+                code.append("c.eq.d $f2,$f0")
+                code.append(f'bc1f __double_le__{counter}')
+                code.append('li $t0, 1')
+                code.append(f'__double_le__{counter}:')
+                code += push_to_stack(0)
             # else:
-        elif self.operator == Operator.EQUALS:  # TODO: String and Double
+        elif self.operator == Operator.NOT_EQUALS:  # TODO: String
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("sne $t2,$t1,$t0")
                 code += push_to_stack(2)
-            # elif operand_type == 'double':
-            #     code += spop_double(0)
-            #     code += spop_double(2)
-            #     code.append()
-            #     code += spush_double(4)
+            elif operand_type == 'double':
+                counter = symbol_table.get_label()
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
+                code.append("c.eq.d $f2,$f0")
+                code.append(f'bc1t __double_le__{counter}')
+                code.append('li $t0, 1')
+                code.append(f'__double_le__{counter}:')
+                code += push_to_stack(0)
             # else:
 
         return code
