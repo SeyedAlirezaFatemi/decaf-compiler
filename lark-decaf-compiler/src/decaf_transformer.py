@@ -331,7 +331,7 @@ class DecafTransformer(Transformer):
                 variable_global_offset += calc_variable_size(variable_type)
         # Second Pass
         # Generate code
-        code = []
+        code = [".globl main", ".text"]
         for arg in args:
             code_part = arg.generate_code(symbol_table)
             code += code_part
