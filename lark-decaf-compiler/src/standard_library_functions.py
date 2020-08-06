@@ -48,7 +48,7 @@ _PrintNewLine:
         sw      $ra, 4($sp)
         addiu   $fp, $sp, 8
         li      $v0, 4
-        lw      $a0, NEWLINE
+        la      $a0, NEWLINE
         syscall
         move    $sp, $fp
         lw      $ra, -4($fp)
@@ -202,5 +202,5 @@ eloop4: addi    $t1, -1         # add \0 at the end.
 .data
 TRUE:.asciiz "true"
 FALSE:.asciiz "false"
-NEWLINE:.asciiz "\n"
+NEWLINE:.asciiz "\\n"
 """

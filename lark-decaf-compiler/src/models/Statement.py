@@ -120,7 +120,7 @@ class PrintStatement(Statement):
             elif expr_type.name == PrimitiveTypes.DOUBLE.value:
                 code.append(f"\tjal _PrintDouble")
             code.append(generate_clean_param_code(size))
-            # code.append(f"\tjal _PrintNewLine")
+            code.append(f"\tjal _PrintNewLine")
         return code
 
 
