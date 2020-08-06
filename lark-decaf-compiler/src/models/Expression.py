@@ -338,7 +338,9 @@ class ArrayAccessLValue(LValue):
         if self.array_expression.evaluate_type(symbol_table) == "int":
             code.append("lw $t0, 0($t2)")
             code += push_to_stack(0)
-        # elif self.array_expression.evaluate_type(symbol_table) == 'double':
+        elif self.array_expression.evaluate_type(symbol_table) == 'double':
+            code.append("l.d $f0, 0($t2)")
+            code += push_double_to_stack(0)
         return code
 
 
