@@ -130,13 +130,14 @@ class BinaryExpression(Expression):
                 code.append("sle $t2,$t1,$t0")
                 code += push_to_stack(2)
             else:
+                counter = symbol_table.get_label()
                 code += pop_double_to_femp(0)
                 code += pop_double_to_femp(2)
                 code.append("c.le.d $f2,$f0")
-                code.append(f'bc1f __double_le__{symbol_table.get_label()}')
+                code.append(f'bc1f __double_le__{counter}')
                 code.append('li $t0, 1')
-                code.append(f'__double_le__{symbol_table.get_label()}:\tsubu $sp,$sp,4')
-                code.append('sw $t0,4($sp)')
+                code.append(f'__double_le__{counter}:')
+                code += push_to_stack(0)
         elif self.operator == Operator.LT:  # TODO: double
             if operand_type == "int":
                 code += pop_to_temp(0)
