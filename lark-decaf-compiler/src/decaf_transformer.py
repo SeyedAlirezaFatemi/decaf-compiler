@@ -221,11 +221,11 @@ class DecafTransformer(Transformer):
         return ThisExpression()
 
     def minus_operation(self, args):
-        expression = args
+        expression = args[0]
         return UnaryExpression(Operator.MINUS, expression)
 
     def not_operation(self, args):
-        expression = args
+        expression = args[0]
         return UnaryExpression(Operator.NOT, expression)
 
     def multiplication_operation(self, args):

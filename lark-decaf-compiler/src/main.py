@@ -65,7 +65,7 @@ class HELLO{}
         """
     int main() {
         while (true) {
-            Print(1);
+            Print(4-6);
             break;
         }
     }
