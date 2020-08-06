@@ -270,7 +270,7 @@ class ReadLine(Expression):
 
 @dataclass
 class LValue(Expression):
-    def calculate_address(self, symbol_table: SymbolTable):
+    def calculate_address(self, symbol_table: SymbolTable) -> str:
         pass
 
 
@@ -283,7 +283,7 @@ OFFSET_TO_FIRST_GLOBAL = 0
 class IdentifierLValue(LValue):
     identifier: Identifier
 
-    def calculate_address(self, symbol_table: SymbolTable):
+    def calculate_address(self, symbol_table: SymbolTable) -> str:
         """
         In a MIPS stack frame, first local is at fp-8, subsequent locals are at fp-12, fp-16, and so on.
         The first param is at fp+4, subsequent ones as fp+8, fp+12, etc. (Because methods have secret
@@ -335,7 +335,7 @@ class ArrayAccessLValue(LValue):
         code += pop_to_temp(1)
         code.append("sll $t1,$t1,2")
         code.append("addu $t2,$t1,$t0")
-        if self.array_expression.evaluate_type(symbol_table) == 'int':
+        if self.array_expression.evaluate_type(symbol_table) == "int":
             code.append("lw $t0, 0($t2)")
             code += push_to_stack(0)
         # elif self.array_expression.evaluate_type(symbol_table) == 'double':
@@ -350,16 +350,11 @@ class Assignment(Expression):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.expression.evaluate_type(symbol_table)
 
-    def generate_code(self, symbol_table: SymbolTable):
-        code = self.l_value.generate_code(symbol_table)
-        code += pop_to_temp(0, 4)
-
-        return code
-
-    def generate_code(self, symbol_table: SymbolTable):
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = self.expression.generate_code(symbol_table)
-        code += pop_to_temp()
+        code += pop_to_temp(0)
         code.append("sb $t0," + self.l_value.calculate_address(symbol_table))
+        # TODO: do we need to generate code for lvalue? I don't think so...
         return code
 
 
