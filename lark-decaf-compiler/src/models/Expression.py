@@ -378,8 +378,12 @@ class Assignment(Expression):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = self.expression.generate_code(symbol_table)
-        code += pop_to_temp(0)
-        code.append("sb $t0," + self.l_value.calculate_address(symbol_table))
+        if self.expression.evaluate_type(symbol_table) == 'int':
+            code += pop_to_temp(0)
+            code.append("sw $t0," + self.l_value.calculate_address(symbol_table))
+        elif self.expression.evaluate_type(symbol_table) == 'double':
+            code += pop_double_to_femp(0)
+            code.append("s.d $f0," + self.l_value.calculate_address(symbol_table))
         # TODO: do we need to generate code for lvalue? I don't think so...
         return code
 
