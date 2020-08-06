@@ -34,7 +34,7 @@ class StatementBlock(Statement):
         freed_space = symbol_table.pop_variables_till_block(
             symbol_table.get_current_scope(), statement_block_scope
         )
-        code.append(f"addiu $sp, $sp, {freed_space} # Freed space")
+        code.append(f"\taddiu $sp, $sp, {freed_space} # Freed space")
         # Clean block scope cause we are out of the block
         symbol_table.set_current_scope(statement_block_scope.parent_scope)
         return code
@@ -119,17 +119,17 @@ class PrintStatement(Statement):
             expr_type = expression.evaluate_type(symbol_table)
             size = calc_variable_size(expr_type)
             code.append(
-                f"subu $sp, $sp, {size}\t# decrement sp to make space for print param"
+                f"\tsubu $sp, $sp, {size}\t# decrement sp to make space for print param"
             )
-            code.append(f"sw $v0, {size}($sp)\t# copy param value to stack")
+            code.append(f"\tsw $v0, {size}($sp)\t# copy param value to stack")
             if expr_type.name == PrimitiveTypes.INT.value:
-                code.append(f"jal _PrintInt")
+                code.append(f"\tjal _PrintInt")
             elif expr_type.name == PrimitiveTypes.STRING.value:
-                code.append(f"jal _PrintString")
+                code.append(f"\tjal _PrintString")
             elif expr_type.name == PrimitiveTypes.BOOL.value:
-                code.append(f"jal _PrintBool")
+                code.append(f"\tjal _PrintBool")
             elif expr_type.name == PrimitiveTypes.DOUBLE.value:
-                code.append(f"jal _PrintDouble")
+                code.append(f"\tjal _PrintDouble")
             code.append(generate_clean_param_code(size))
         return code
 

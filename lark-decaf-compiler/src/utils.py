@@ -11,7 +11,7 @@ def calc_variable_size(variable_type: Type):
 
 
 def generate_clean_param_code(params_size: int) -> str:
-    return f"sw $sp, {params_size}($sp)\t# clean parameters"
+    return f"\tsw $sp, {params_size}($sp)\t# clean parameters"
 
 
 RETURN_ADDRESS = "-4($fp)"

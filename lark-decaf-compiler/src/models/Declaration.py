@@ -65,18 +65,18 @@ class FunctionDeclaration(Declaration):
             function_scope.add_declaration(param)
         code = [
             f"{self.label}:",
-            "subu $sp, $sp, 8\t# decrement sp to make space to save ra, fp",
-            "sw $fp, 8($sp)\t# save fp",
-            "sw $ra, 4($sp)\t# save ra",
-            "addiu $fp, $sp, 8\t# set up new fp",
+            "\tsubu $sp, $sp, 8\t# decrement sp to make space to save ra, fp",
+            "\tsw $fp, 8($sp)\t# save fp",
+            "\tsw $ra, 4($sp)\t# save ra",
+            "\taddiu $fp, $sp, 8\t# set up new fp",
         ]
         # TODO: What about objects?
         code += self.body.generate_code(symbol_table)
         code += [
-            "move $sp, $fp\t\t# pop callee frame off stack",
-            "lw $ra, -4($fp)\t# restore saved ra",
-            "lw $fp, 0($fp)\t# restore saved fp",
-            "jr $ra\t\t# return from function",
+            "\tmove $sp, $fp\t\t# pop callee frame off stack",
+            "\tlw $ra, -4($fp)\t# restore saved ra",
+            "\tlw $fp, 0($fp)\t# restore saved fp",
+            "\tjr $ra\t\t# return from function",
         ]
         # Reset
         symbol_table.reset_local_offset()

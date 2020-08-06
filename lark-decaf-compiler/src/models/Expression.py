@@ -281,5 +281,9 @@ class Constant(Expression):
     constant_type: Type
     value: Union[bool, str, int, float]
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = [f"\tli $v0, {self.value}\t# load constant value to $v0"]
+        return code
+
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.constant_type
