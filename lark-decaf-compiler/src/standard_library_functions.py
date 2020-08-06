@@ -42,6 +42,20 @@ _PrintString:
         jr      $ra
 
 
+_PrintNewLine:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        li      $v0, 4
+        lw      $a0, NEWLINE
+        syscall
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
+
+
 _PrintBool:
         subu    $sp, $sp, 8
         sw      $fp, 8($sp)
@@ -188,4 +202,5 @@ eloop4: addi    $t1, -1         # add \0 at the end.
 .data
 TRUE:.asciiz "true"
 FALSE:.asciiz "false"
+NEWLINE:.asciiz "\n"
 """

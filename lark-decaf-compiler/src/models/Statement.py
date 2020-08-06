@@ -97,13 +97,6 @@ class ReturnStatement(Statement):
         code = []
         if self.return_expression is not None:
             code += self.return_expression.generate_code(symbol_table)
-        # TODO: Shouldn't we move this to the end of FunctionDeclaration?
-        code += [
-            "move    $sp, $fp ",
-            "lw      $ra, -4($fp)",
-            "lw      $fp, 0($fp)",
-            "jr      $ra",
-        ]
         return code
 
 
@@ -127,6 +120,7 @@ class PrintStatement(Statement):
             elif expr_type.name == PrimitiveTypes.DOUBLE.value:
                 code.append(f"\tjal _PrintDouble")
             code.append(generate_clean_param_code(size))
+            # code.append(f"\tjal _PrintNewLine")
         return code
 
 
