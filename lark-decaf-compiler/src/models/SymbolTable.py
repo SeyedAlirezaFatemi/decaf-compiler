@@ -52,6 +52,7 @@ class SymbolTable:
     else_number: int = 0
     if_number: int = 0
     local_offset: int = 0
+    label_counter: int = 0
 
     def __init__(self):
         # init global scope
@@ -140,3 +141,7 @@ class SymbolTable:
         return self.pop_variables_till_block(
             scope.parent_scope, block_scope, popped_size_till_now
         )
+
+    def get_label(self):
+        self.label_counter += 1
+        return self.label_counter

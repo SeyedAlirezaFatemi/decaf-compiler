@@ -129,11 +129,14 @@ class BinaryExpression(Expression):
                 code += pop_to_temp(1)
                 code.append("sle $t2,$t1,$t0")
                 code += push_to_stack(2)
-            # else:
-            #     code += spop_double(0)
-            #     code += spop_double(2)
-            #     code.append()
-            #     code += spush_double(4)
+            else:
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
+                code.append("c.le.d $f2,$f0")
+                code.append(f'bc1f __double_le__{symbol_table.get_label()}')
+                code.append('li $t0, 1')
+                code.append(f'__double_le__{symbol_table.get_label()}:')
+                code += push_to_stack(0)
         elif self.operator == Operator.LT:  # TODO: double
             if operand_type == "int":
                 code += pop_to_temp(0)
@@ -282,18 +285,6 @@ OFFSET_TO_FIRST_GLOBAL = 0
 @dataclass
 class IdentifierLValue(LValue):
     identifier: Identifier
-
-    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        address = self.calculate_address(symbol_table)
-        size = calc_variable_size(self.identifier.evaluate_type(symbol_table))
-        code = [
-            f"\t### Loading {self.identifier.name} value to stack ###",
-            f"\tsubu $sp,$sp,{size}\t# move sp down cause of load l_value {self.identifier.name}",
-            f"\tlw $t4, {address}\t# copy {address} to t10",
-            f"\tsw $t4,{size}($sp)\t# copy $t10 to stack",
-            f"\t### Done loading {self.identifier.name} value to stack ###",
-        ]
-        return code
 
     def calculate_address(self, symbol_table: SymbolTable) -> str:
         """
