@@ -77,7 +77,7 @@ class BinaryExpression(Expression):
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
-                code.append("addu $t2,$t0,$t1")
+                code.append("addu $t2,$t1,$t0")
                 code += push_to_stack(2)
             else:
                 code += pop_double_to_femp(0)
@@ -88,7 +88,7 @@ class BinaryExpression(Expression):
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
-                code.append("sub $t2,$t0,$t1")
+                code.append("sub $t2,$t1,$t0")
                 code += push_to_stack(2)
             else:
                 code += pop_double_to_femp(0)
@@ -99,7 +99,7 @@ class BinaryExpression(Expression):
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
-                code.append("mul $t2,$t0,$t1")
+                code.append("mul $t2,$t1,$t0")
                 code += push_to_stack(2)
             else:
                 code += pop_double_to_femp(0)
@@ -110,7 +110,7 @@ class BinaryExpression(Expression):
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
-                code.append("div $t2,$t0,$t1")
+                code.append("div $t2,$t1,$t0")
                 code += push_to_stack(2)
             else:
                 code += pop_double_to_femp(0)
@@ -120,7 +120,7 @@ class BinaryExpression(Expression):
         elif self.operator == Operator.MODULO:
             code += pop_to_temp(0)
             code += pop_to_temp(1)
-            code.append("div $t2,$t0,$t1")
+            code.append("div $t2,$t1,$t0")
             code.append("mfhi $t2")
             code += push_to_stack(2)
         elif self.operator == Operator.LTE:  # TODO: double
@@ -327,6 +327,19 @@ class ArrayAccessLValue(LValue):
         array_type = self.array_expression.evaluate_type(symbol_table)
         assert isinstance(array_type, ArrayType)
         return array_type.element_type
+
+    def generate_code(self, symbol_table: SymbolTable):
+        code = self.array_expression.generate_code(symbol_table)
+        code += pop_to_temp(0)
+        code += self.index_expression.generate_code(symbol_table)
+        code += pop_to_temp(1)
+        code.append("sll $t1,$t1,2")
+        code.append("addu $t2,$t1,$t0")
+        if self.array_expression.evaluate_type(symbol_table) == 'int':
+            code.append("lw $t0, 0($t2)")
+            code += push_to_stack(0)
+        # elif self.array_expression.evaluate_type(symbol_table) == 'double':
+        return code
 
 
 @dataclass
