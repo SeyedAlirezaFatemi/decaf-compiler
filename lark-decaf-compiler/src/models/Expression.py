@@ -321,7 +321,7 @@ class ArrayAccessLValue(LValue):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         array_type = self.array_expression.evaluate_type(symbol_table)
         assert isinstance(array_type, ArrayType)
-        return array_type.elementType
+        return array_type.element_type
 
 
 @dataclass
