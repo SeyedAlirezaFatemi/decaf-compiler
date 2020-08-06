@@ -225,6 +225,7 @@ class UnaryExpression(Expression):
             code += push_to_stack(0)
         return code
 
+
 @dataclass
 class ThisExpression(Expression):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
@@ -288,10 +289,6 @@ class IdentifierLValue(LValue):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.identifier.evaluate_type(symbol_table)
 
-    def generate_code(self, symbol_table: SymbolTable):
-        code = ["lb $t0," + self.calculate_address(symbol_table)]
-        return code
-
 
 @dataclass
 class MemberAccessLValue(LValue):
@@ -324,6 +321,18 @@ class Assignment(Expression):
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.expression.evaluate_type(symbol_table)
+
+    def generate_code(self, symbol_table: SymbolTable):
+        code = self.l_value.generate_code(symbol_table)
+        code += pop_to_temp(0, 4)
+
+        return code
+
+    def generate_code(self, symbol_table: SymbolTable):
+        code = self.expression.generate_code(symbol_table)
+        code += pop_to_temp()
+        code.append("sb $t0," + self.l_value.calculate_address(symbol_table))
+        return code
 
 
 @dataclass
