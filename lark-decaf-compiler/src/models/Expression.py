@@ -51,7 +51,13 @@ class BinaryExpression(Expression):
     right_expression: Expression
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        return self.left_expression.evaluate_type(symbol_table)
+        if self.operator in [Operator.AND, Operator.OR,
+                             Operator.LT, Operator.LTE,
+                             Operator.GT, Operator.GTE,
+                             Operator.EQUALS, Operator.NOT_EQUALS]:
+            return Type(PrimitiveTypes.BOOL.value)
+        else:
+            return self.expression.evaluate_type(symbol_table)
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
@@ -200,6 +206,24 @@ class UnaryExpression(Expression):
         elif self.operator == Operator.NOT:
             return Type(PrimitiveTypes.BOOL.value)
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = self.expression.generate_code(symbol_table)
+        if self.operator == Operator.MINUS:
+            if self.evaluate_type(symbol_table) == "int":
+                code += pop_to_temp(0)
+                code.append("addi $t1, $zero, -1")
+                code.append("mul $t2,$t0,$t1")
+                code += push_to_stack(2)
+            else:
+                code += pop_double_to_femp(0)
+                code.append("addi $f2, $zero, -1")
+                code.append("mul.d $f4, $f2, $f0")
+                code += push_double_to_stack(4)
+        elif self.operator == Operator.NOT:
+            code += pop_to_temp(0)
+            code.append("nor $t0, $t0, $t0")
+            code += push_to_stack(0)
+        return code
 
 @dataclass
 class ThisExpression(Expression):
@@ -211,8 +235,7 @@ class ThisExpression(Expression):
 @dataclass
 class ReadInteger(Expression):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        code = []
-        # TODO: call the _ReadInteger function in standard_library_functions.py
+        code = [f"\tjal _ReadInteger"]
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
@@ -222,8 +245,7 @@ class ReadInteger(Expression):
 @dataclass
 class ReadLine(Expression):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        code = []
-        # TODO: call the _ReadLine function in standard_library_functions.py
+        code = [f"\tjal _ReadLine"]
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
@@ -267,8 +289,8 @@ class IdentifierLValue(LValue):
         return self.identifier.evaluate_type(symbol_table)
 
     def generate_code(self, symbol_table: SymbolTable):
-        # TODO:
-        pass
+        code = ["lb $t0," + self.calculate_address(symbol_table)]
+        return code
 
 
 @dataclass
