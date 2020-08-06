@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional, TYPE_CHECKING, Union
 
-from ..utils import generate_clean_param_code, calc_variable_size
+from ..utils import generate_clean_param_code, calc_variable_size, pop_to_temp
 from .Declaration import VariableDeclaration
 from .Node import Node
 from .Type import PrimitiveTypes
@@ -69,6 +69,7 @@ class IfStatement(Statement):
             self.if_number = symbol_table.get_current_if_number()
             self.end_if_label = f"end_if_{self.if_number}"
             code += self.condition_expression.generate_code(symbol_table)
+            code += pop_to_temp(1)
             code.append(f"beqz $t1, {self.end_if_label}")
             code += self.body_statement.generate_code(symbol_table)
             code.append(f"{self.end_if_label}:")
@@ -78,6 +79,7 @@ class IfStatement(Statement):
             self.start_else_label = f"else_{self.else_number}"
             self.end_else_label = f"end_else_{self.else_number}"
             code += self.condition_expression.generate_code(symbol_table)
+            code += pop_to_temp(1)
             code.append(f"beqz $t1, {self.start_else_label}")
             code += self.body_statement.generate_code(symbol_table)
             code.append(f"jmp {self.end_else_label}")
@@ -141,6 +143,7 @@ class WhileStatement(Statement):
         code.append(f"{self.start_label}:")
         code += self.condition_expression.generate_code(symbol_table)
         code.append(f"\tlw $t1, 4($sp)\t#load expression value from stack to t1")
+        code += pop_to_temp(1)
         code.append(f"\tbeqz $t1,{self.end_label}")
         code += self.body_statement.generate_code(symbol_table)
         code.append(f"{self.end_label}:")
@@ -169,6 +172,7 @@ class ForStatement(Statement):
             code += self.initialization_expression.generate_code(symbol_table)
         code.append(f"{self.start_label}:")
         code += self.condition_expression.generate_code(symbol_table)
+        code += pop_to_temp(1)
         code.append(f"beqz $t1,{self.end_label}")
         code += self.body_statement.generate_code(symbol_table)
         if self.update_expression is not None:

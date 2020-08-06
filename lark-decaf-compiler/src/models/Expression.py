@@ -8,7 +8,13 @@ from .Declaration import ClassDeclaration, FunctionDeclaration, VariableDeclarat
 from .Identifier import Identifier
 from .Node import Node
 from .Type import Type, PrimitiveTypes, NamedType, ArrayType
-from ..utils import calc_variable_size, pop_to_temp, push_to_stack
+from ..utils import (
+    calc_variable_size,
+    pop_to_temp,
+    push_to_stack,
+    pop_double_to_femp,
+    push_double_to_stack,
+)
 
 if TYPE_CHECKING:
     from .SymbolTable import SymbolTable
@@ -53,131 +59,131 @@ class BinaryExpression(Expression):
         code += self.right_expression.generate_code(symbol_table)
         if self.operator == Operator.ADDITION:
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("addu $t2,$t0,$t1")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             else:
-                code += pop_to_temp(8, 0)
-                code += pop_to_temp(8, 2)
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
                 code.append("add.d $f4, $f2, $f0")
-                code += push_to_stack(8, 4)
+                code += push_double_to_stack(4)
         elif self.operator == Operator.MINUS:
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("sub $t2,$t0,$t1")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             else:
-                code += pop_to_temp(8, 0)
-                code += pop_to_temp(8, 2)
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
                 code.append("sub.d $f4, $f2, $f0")
-                code += push_to_stack(8, 4)
+                code += push_double_to_stack(4)
         elif self.operator == Operator.MULTIPLICATION:
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("mul $t2,$t0,$t1")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             else:
-                code += pop_to_temp(8, 0)
-                code += pop_to_temp(8, 2)
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
                 code.append("mul.d $f4, $f2, $f0")
-                code += push_to_stack(8, 4)
+                code += push_double_to_stack(4)
         elif self.operator == Operator.DIVISION:
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("div $t2,$t0,$t1")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             else:
-                code += pop_to_temp(8, 0)
-                code += pop_to_temp(8, 2)
+                code += pop_double_to_femp(0)
+                code += pop_double_to_femp(2)
                 code.append("div.d $f4, $f2, $f0")
-                code += push_to_stack(8, 4)
+                code += push_double_to_stack(4)
         elif self.operator == Operator.MODULO:
-            code += pop_to_temp(4, 0)
-            code += pop_to_temp(4, 1)
+            code += pop_to_temp(0)
+            code += pop_to_temp(1)
             code.append("div $t2,$t0,$t1")
             code.append("mfhi $t2")
-            code += push_to_stack(4, 2)
+            code += push_to_stack(2)
         elif self.operator == Operator.LTE:  # TODO: double
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("sle $t2,$t1,$t0")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             # else:
-            #     code += pop_to_temp(8, 0)
-            #     code += pop_to_temp(8, 2)
+            #     code += spop_double(0)
+            #     code += spop_double(2)
             #     code.append()
-            #     code += push_to_stack(8, 4)
+            #     code += spush_double(4)
         elif self.operator == Operator.LT:  # TODO: double
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("slt $t2,$t1,$t0")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             # else:
-            #     code += pop_to_temp(8, 0)
-            #     code += pop_to_temp(8, 2)
+            #     code += spop_double(0)
+            #     code += spop_double(2)
             #     code.append()
-            #     code += push_to_stack(8, 4)
+            #     code += spush_double(4)
         elif self.operator == Operator.GTE:  # TODO: double
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("sge $t2,$t1,$t0")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             # else:
-            #     code += pop_to_temp(8, 0)
-            #     code += pop_to_temp(8, 2)
+            #     code += spop_double(0)
+            #     code += spop_double(2)
             #     code.append()
-            #     code += push_to_stack(8, 4)
+            #     code += spush_double(4)
         elif self.operator == Operator.GT:  # TODO: double
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("sgt $t2,$t1,$t0")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             # else:
-            #     code += pop_to_temp(8, 0)
-            #     code += pop_to_temp(8, 2)
+            #     code += spop_double(0)
+            #     code += spop_double(2)
             #     code.append()
-            #     code += push_to_stack(8, 4)
+            #     code += spush_double(4)
         elif self.operator == Operator.AND:
-            code += pop_to_temp(4, 0)
-            code += pop_to_temp(4, 1)
+            code += pop_to_temp(0)
+            code += pop_to_temp(1)
             code.append("and $t2,$t1,$t0")
-            code += push_to_stack(4, 2)
+            code += push_to_stack(2)
         elif self.operator == Operator.OR:
-            code += pop_to_temp(4, 0)
-            code += pop_to_temp(4, 1)
+            code += pop_to_temp(0)
+            code += pop_to_temp(1)
             code.append("or $t2,$t1,$t0")
-            code += push_to_stack(4, 2)
+            code += push_to_stack(2)
         elif self.operator == Operator.EQUALS:  # TODO: String and Double
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("seq $t2,$t1,$t0")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             # elif self.evaluate_type(symbol_table) == 'double':
-            #     code += pop_to_temp(8, 0)
-            #     code += pop_to_temp(8, 2)
+            #     code += spop_double(0)
+            #     code += spop_double(2)
             #     code.append()
-            #     code += push_to_stack(8, 4)
+            #     code += spush_double(4)
             # else:
         elif self.operator == Operator.EQUALS:  # TODO: String and Double
             if self.evaluate_type(symbol_table) == "int":
-                code += pop_to_temp(4, 0)
-                code += pop_to_temp(4, 1)
+                code += pop_to_temp(0)
+                code += pop_to_temp(1)
                 code.append("sne $t2,$t1,$t0")
-                code += push_to_stack(4, 2)
+                code += push_to_stack(2)
             # elif self.evaluate_type(symbol_table) == 'double':
-            #     code += pop_to_temp(8, 0)
-            #     code += pop_to_temp(8, 2)
+            #     code += spop_double(0)
+            #     code += spop_double(2)
             #     code.append()
-            #     code += push_to_stack(8, 4)
+            #     code += spush_double(4)
             # else:
 
         return code
