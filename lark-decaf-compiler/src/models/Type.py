@@ -25,12 +25,27 @@ PRIMITIVE_TYPES = {"int", "double", "bool", "string"}
 class Type(Node):
     name: str
 
+    def __eq__(self, other):
+        if isinstance(other, Type):
+            return self.name == other.name
+        elif isinstance(other, str):
+            return self.name == other
+        elif isinstance(other, PrimitiveTypes):
+            return self.name == other.value
+        return False
 
-@dataclass
+
 class NamedType(Type):
     identifier: Identifier
 
+    def __init__(self, identifier: Identifier):
+        self.name = identifier.name
+        self.identifier = identifier
 
-@dataclass
+
 class ArrayType(Type):
-    elementType: Type
+    element_type: Type
+
+    def __init__(self, element_type: Type):
+        self.name = f"{element_type.name}[]"
+        self.element_type = element_type

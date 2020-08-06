@@ -64,7 +64,7 @@ class UnaryExpression(Expression):
 class ThisExpression(Expression):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         class_decl = symbol_table.get_current_scope().find_which_class_we_are_in()
-        return NamedType(class_decl.identifier.name, class_decl.identifier)
+        return NamedType(class_decl.identifier)
 
 
 @dataclass
@@ -146,7 +146,7 @@ class ArrayAccessLValue(LValue):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         array_type = self.array_expression.evaluate_type(symbol_table)
         assert isinstance(array_type, ArrayType)
-        return array_type.elementType
+        return array_type.element_type
 
 
 @dataclass
@@ -213,7 +213,7 @@ class InitiateClass(Expression):
     class_identifier: Identifier
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        return NamedType(self.class_identifier.name, self.class_identifier)
+        return NamedType(self.class_identifier)
 
 
 @dataclass
@@ -222,7 +222,7 @@ class InitiateArray(Expression):
     element_type: Type
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        return ArrayType(self.element_type.name, self.element_type)
+        return ArrayType(self.element_type)
 
 
 @dataclass

@@ -1,4 +1,4 @@
-code = """
+standard_library_functions = """
 _PrintInt:
         subu    $sp, $sp, 8
         sw      $fp, 8($sp)

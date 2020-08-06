@@ -55,7 +55,7 @@ class FunctionDeclaration(Declaration):
         # Reset local offset for correct local variable addressing
         symbol_table.reset_local_offset()
         if self.owner_class is None:
-            self.label = f"{self.identifier.name}_func"
+            self.label = self.identifier.name
         else:
             self.label = (
                 f"{self.owner_class.identifier.name}_{self.identifier.name}_meth"

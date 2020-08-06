@@ -2,6 +2,7 @@ from typing import List
 
 from lark import Transformer
 
+from .standard_library_functions import standard_library_functions
 from .models.Declaration import (
     FunctionDeclaration,
     VariableDeclaration,
@@ -57,11 +58,11 @@ class DecafTransformer(Transformer):
 
     def array_type(self, args):
         element_type = args[0]
-        return ArrayType(element_type.name, element_type)
+        return ArrayType(element_type)
 
     def named_type(self, args):
         identifier = args[0]
-        return NamedType(identifier.name, identifier)
+        return NamedType(identifier)
 
     def prim_type(self, args):
         prim = args[0]
@@ -337,3 +338,4 @@ class DecafTransformer(Transformer):
         # Write on file
         with open("out.asm", "w") as f:
             print("\n".join(code), file=f)
+            print(standard_library_functions, file=f)

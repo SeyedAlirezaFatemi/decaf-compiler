@@ -61,6 +61,13 @@ class HELLO{}
     }
 """
     )
+    tree = decaf_parser.parse(
+        """
+    int main() {
+        Print(1);
+    }
+"""
+    )
     DecafTransformer().transform(tree)
     return
     inputfile = ""
