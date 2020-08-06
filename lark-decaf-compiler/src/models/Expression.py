@@ -51,7 +51,7 @@ class BinaryExpression(Expression):
     right_expression: Expression
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        if self.operator in [
+        if self.operator in {
             Operator.AND,
             Operator.OR,
             Operator.LT,
@@ -60,7 +60,7 @@ class BinaryExpression(Expression):
             Operator.GTE,
             Operator.EQUALS,
             Operator.NOT_EQUALS,
-        ]:
+        }:
             return Type(PrimitiveTypes.BOOL.value)
         else:
             return self.left_expression.evaluate_type(symbol_table)
@@ -69,8 +69,12 @@ class BinaryExpression(Expression):
         code = []
         code += self.left_expression.generate_code(symbol_table)
         code += self.right_expression.generate_code(symbol_table)
+        left_operand_type = self.left_expression.evaluate_type(symbol_table)
+        right_operand_type = self.right_expression.evaluate_type(symbol_table)
+        assert left_operand_type == right_operand_type
+        operand_type = left_operand_type
         if self.operator == Operator.ADDITION:
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("addu $t2,$t0,$t1")
@@ -81,7 +85,7 @@ class BinaryExpression(Expression):
                 code.append("add.d $f4, $f2, $f0")
                 code += push_double_to_stack(4)
         elif self.operator == Operator.MINUS:
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("sub $t2,$t0,$t1")
@@ -92,7 +96,7 @@ class BinaryExpression(Expression):
                 code.append("sub.d $f4, $f2, $f0")
                 code += push_double_to_stack(4)
         elif self.operator == Operator.MULTIPLICATION:
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("mul $t2,$t0,$t1")
@@ -103,7 +107,7 @@ class BinaryExpression(Expression):
                 code.append("mul.d $f4, $f2, $f0")
                 code += push_double_to_stack(4)
         elif self.operator == Operator.DIVISION:
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("div $t2,$t0,$t1")
@@ -120,7 +124,7 @@ class BinaryExpression(Expression):
             code.append("mfhi $t2")
             code += push_to_stack(2)
         elif self.operator == Operator.LTE:  # TODO: double
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("sle $t2,$t1,$t0")
@@ -131,7 +135,7 @@ class BinaryExpression(Expression):
             #     code.append()
             #     code += spush_double(4)
         elif self.operator == Operator.LT:  # TODO: double
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("slt $t2,$t1,$t0")
@@ -142,7 +146,7 @@ class BinaryExpression(Expression):
             #     code.append()
             #     code += spush_double(4)
         elif self.operator == Operator.GTE:  # TODO: double
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("sge $t2,$t1,$t0")
@@ -153,7 +157,7 @@ class BinaryExpression(Expression):
             #     code.append()
             #     code += spush_double(4)
         elif self.operator == Operator.GT:  # TODO: double
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("sgt $t2,$t1,$t0")
@@ -174,24 +178,24 @@ class BinaryExpression(Expression):
             code.append("or $t2,$t1,$t0")
             code += push_to_stack(2)
         elif self.operator == Operator.EQUALS:  # TODO: String and Double
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("seq $t2,$t1,$t0")
                 code += push_to_stack(2)
-            # elif self.evaluate_type(symbol_table) == 'double':
+            # elif operand_type == 'double':
             #     code += spop_double(0)
             #     code += spop_double(2)
             #     code.append()
             #     code += spush_double(4)
             # else:
         elif self.operator == Operator.EQUALS:  # TODO: String and Double
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
                 code.append("sne $t2,$t1,$t0")
                 code += push_to_stack(2)
-            # elif self.evaluate_type(symbol_table) == 'double':
+            # elif operand_type == 'double':
             #     code += spop_double(0)
             #     code += spop_double(2)
             #     code.append()
@@ -214,8 +218,9 @@ class UnaryExpression(Expression):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = self.expression.generate_code(symbol_table)
+        operand_type = self.expression.evaluate_type(symbol_table)
         if self.operator == Operator.MINUS:
-            if self.evaluate_type(symbol_table) == "int":
+            if operand_type == "int":
                 code += pop_to_temp(0)
                 code.append("addi $t1, $zero, -1")
                 code.append("mul $t2,$t0,$t1")

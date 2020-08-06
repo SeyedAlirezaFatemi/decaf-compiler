@@ -128,6 +128,7 @@ class SymbolTable:
         self, scope: Scope, block_scope: Scope, popped_size_till_now: int = 0
     ) -> int:
         from .Declaration import VariableDeclaration
+
         if scope == block_scope:
             return popped_size_till_now
         for decl in scope.name_declaration_map.values():

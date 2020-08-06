@@ -23,7 +23,9 @@ class Identifier(Node):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         from .Declaration import VariableDeclaration
 
-        if self.declaration is not None and isinstance(self.declaration, VariableDeclaration):
+        if self.declaration is not None and isinstance(
+            self.declaration, VariableDeclaration
+        ):
             return self.declaration.variable_type
         decl = self.find_declaration(symbol_table)
         if isinstance(decl, VariableDeclaration):
