@@ -53,14 +53,19 @@ class HELLO{}
     class HELLO{
         int getAge() {}
     }
-    /* int getAge() {
-        a.a();
+    int getAge() {
         for (;x<0;){
         }
-        //Print(1, 2, 3);
-        //return;
-    } */
-    
+        Print(1, 2, 3);
+        return;
+    }
+"""
+    )
+    tree = decaf_parser.parse(
+        """
+    int main() {
+        Print(1);
+    }
 """
     )
     DecafTransformer().transform(tree)

@@ -8,7 +8,7 @@ from .Node import Node
 from ..utils import calc_variable_size
 
 if TYPE_CHECKING:
-    from .Statement import Statement
+    from .Statement import StatementBlock
     from .SymbolTable import SymbolTable
     from .Type import Type
 
@@ -30,14 +30,15 @@ class VariableDeclaration(Declaration):
     local_offset: int = 0
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = []
         current_scope = symbol_table.enter_new_scope()
         current_scope.add_declaration(self)
         if not (self.is_global or self.is_class_member or self.is_function_parameter):
             self.local_offset = symbol_table.get_local_offset()
             symbol_table.increment_local_offset(calc_variable_size(self.variable_type))
-        code = [
-            f"subu $sp, $sp, {calc_variable_size(self.variable_type)} # decrement sp to make space for variable {self.identifier.name}"
-        ]
+            code += [
+                f"subu $sp, $sp, {calc_variable_size(self.variable_type)} # decrement sp to make space for variable {self.identifier.name}"
+            ]
         return code
 
 
@@ -45,25 +46,41 @@ class VariableDeclaration(Declaration):
 class FunctionDeclaration(Declaration):
     formal_parameters: List[VariableDeclaration]
     return_type: Type
-    body: Statement
+    body: StatementBlock
     is_method: bool = False
     owner_class: Optional[ClassDeclaration] = None
     label: str = "UNSPECIFIED"
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        code = []
         # Reset local offset for correct local variable addressing
         symbol_table.reset_local_offset()
         if self.owner_class is None:
-            self.label = f"{self.identifier.name}_func"
+            self.label = self.identifier.name
         else:
             self.label = (
                 f"{self.owner_class.identifier.name}_{self.identifier.name}_meth"
             )
-
-        # TODO: add formal parameters to symbol table and generate code
-
+        function_scope = symbol_table.enter_new_scope(self.owner_class)
+        for param in self.formal_parameters:
+            function_scope.add_declaration(param)
+        code = [
+            f"{self.label}:",
+            "subu $sp, $sp, 8\t# decrement sp to make space to save ra, fp",
+            "sw $fp, 8($sp)\t# save fp",
+            "sw $ra, 4($sp)\t# save ra",
+            "addiu $fp, $sp, 8\t# set up new fp",
+        ]
+        # TODO: What about objects?
+        code += self.body.generate_code(symbol_table)
+        code += [
+            "move $sp, $fp\t\t# pop callee frame off stack",
+            "lw $ra, -4($fp)\t# restore saved ra",
+            "lw $fp, 0($fp)\t# restore saved fp",
+            "jr $ra\t\t# return from function",
+        ]
+        # Reset
         symbol_table.reset_local_offset()
+        symbol_table.set_current_scope(function_scope.parent_scope)
         return code
 
 

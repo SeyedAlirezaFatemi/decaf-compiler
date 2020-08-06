@@ -13,9 +13,9 @@ variable_decl: variable ";" -> new_variable
 
 variable: type new_identifier -> variable_definition
 
-type: PRIM -> pass_up_first_element
-    | identifier -> pass_up_first_element
-    | type "[]" -> todo
+type: PRIM -> prim_type
+    | identifier -> named_type
+    | type "[]" -> array_type
 
 function_decl: type new_identifier "(" formals ")" stmt_block -> new_function
     | "void" new_identifier "(" formals ")" stmt_block -> new_void_function
@@ -120,11 +120,11 @@ actuals:  expr ("," expr)* -> pass_up
 identifier: IDENT -> identifier
 new_identifier: IDENT -> new_identifier
 
-constant: INTEGER -> pass_up_first_element
-    | DOUBLE -> pass_up_first_element
-    | BOOL -> pass_up_first_element
-    | STRING -> pass_up_first_element
-    | "null" -> pass_up_first_element
+constant: INTEGER -> int_const
+    | DOUBLE -> double_const
+    | BOOL -> bool_const
+    | STRING -> string_const
+    | "null" -> null_const
 
 PRIM.2: "int"
     | "double"

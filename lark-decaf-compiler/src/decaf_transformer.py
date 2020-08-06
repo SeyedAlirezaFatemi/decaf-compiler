@@ -2,7 +2,7 @@ from typing import List
 
 from lark import Transformer
 
-from .utils import calc_variable_size
+from .standard_library_functions import standard_library_functions
 from .models.Declaration import (
     FunctionDeclaration,
     VariableDeclaration,
@@ -22,6 +22,7 @@ from .models.Expression import (
     FunctionCall,
     MethodCall,
     Operator,
+    Constant,
 )
 from .models.Identifier import Identifier
 from .models.Statement import (
@@ -36,7 +37,8 @@ from .models.Statement import (
     Statement,
 )
 from .models.SymbolTable import SymbolTable
-from .models.Type import Type
+from .models.Type import Type, ArrayType, NamedType, PrimitiveTypes
+from .utils import calc_variable_size
 
 variable_size = {"int": 4, "string": 100, "double": 8, "bool": 4}
 stack_pointer = 0x7FFFFFFF
@@ -53,6 +55,33 @@ class DecafTransformer(Transformer):
         if len(args) == 0:
             return None
         return args[0]
+
+    def array_type(self, args):
+        element_type = args[0]
+        return ArrayType(element_type)
+
+    def named_type(self, args):
+        identifier = args[0]
+        return NamedType(identifier)
+
+    def prim_type(self, args):
+        prim = args[0]
+        return Type(prim)
+
+    def int_const(self, args):
+        return Constant(Type(PrimitiveTypes.INT.value), args[0])
+
+    def double_const(self, args):
+        return Constant(Type(PrimitiveTypes.DOUBLE.value), args[0])
+
+    def string_const(self, args):
+        return Constant(Type(PrimitiveTypes.STRING.value), args[0])
+
+    def bool_const(self, args):
+        return Constant(Type(PrimitiveTypes.BOOL.value), args[0])
+
+    def null_const(self, args):
+        return Constant(Type(PrimitiveTypes.NULL.value), args[0])
 
     def new_identifier(self, args):
         identifier_name = args[0]
@@ -100,8 +129,7 @@ class DecafTransformer(Transformer):
         for idx, formal_parameter in enumerate(function_declaration.formal_parameters):
             formal_parameter.is_function_parameter = True
             formal_parameter.function_parameter_offset = offset
-            # TODO: This addition should be based on formal_parameter.variable_type
-            offset += 4
+            offset += calc_variable_size(formal_parameter.variable_type)
         return function_declaration
 
     def new_class(self, args):
@@ -305,9 +333,9 @@ class DecafTransformer(Transformer):
         # Generate code
         code = []
         for arg in args:
-            # Uncomment if generate_code is implemented in needed models
-            # code_part = arg.generate_code(symbol_table)
-            # code += code_part
-            pass
+            code_part = arg.generate_code(symbol_table)
+            code += code_part
         # Write on file
-        # TODO
+        with open("out.asm", "w") as f:
+            print("\n".join(code), file=f)
+            print(standard_library_functions, file=f)

@@ -1,4 +1,4 @@
-code = """
+standard_library_functions = """
 _PrintInt:
         subu    $sp, $sp, 8
         sw      $fp, 8($sp)
@@ -7,6 +7,21 @@ _PrintInt:
         li      $v0, 1
         lw      $a0, 4($fp)
         syscall
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
+
+_PrintDouble:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        
+        li      $v0, 3
+        l.s     $f12, 4($fp)    # load double value to $f12
+        syscall
+        
         move    $sp, $fp
         lw      $ra, -4($fp)
         lw      $fp, 0($fp)
