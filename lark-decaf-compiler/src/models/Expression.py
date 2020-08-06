@@ -37,30 +37,6 @@ class Expression(Node):
         pass
 
 
-def spop(num):
-    code = [f"lw   $t{num},0($sp)"]
-    code.append("addu $sp,$sp,4")
-    return code
-
-
-def spush(num):
-    code = ["subu $sp,$sp,4"]
-    code.append(f"sw   $t{num},0($sp)")
-    return code
-
-
-def spop_double(num):
-    code = [f"l.d   $f{num},0($sp)"]
-    code.append("addu $sp,$sp,8")
-    return code
-
-
-def spush_double(num):
-    code = ["subu $sp,$sp,8"]
-    code.append(f"s.d   $f{num},0($sp)")
-    return code
-
-
 @dataclass
 class BinaryExpression(Expression):
     operator: Operator
@@ -68,8 +44,7 @@ class BinaryExpression(Expression):
     right_expression: Expression
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        # TODO: based on operators and left and right expression
-        pass
+        return self.left_expression.evaluate_type(symbol_table)
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
@@ -79,8 +54,8 @@ class BinaryExpression(Expression):
             if self.evaluate_type(symbol_table) == "int":
                 code += spop(0)
                 code += spop(1)
-                code.append("addu $t0,$t0,$t1")
-                code += spush(0)
+                code.append("addu $t2,$t0,$t1")
+                code += spush(2)
             else:
                 code += spop_double(0)
                 code += spop_double(2)
@@ -90,13 +65,120 @@ class BinaryExpression(Expression):
             if self.evaluate_type(symbol_table) == "int":
                 code += spop(0)
                 code += spop(1)
-                code.append("sub $t0,$t0,$t1")
-                code += spush(0)
+                code.append("sub $t2,$t0,$t1")
+                code += spush(2)
             else:
                 code += spop_double(0)
                 code += spop_double(2)
                 code.append("sub.d $f4, $f2, $f0")
                 code += spush_double(4)
+        elif self.operator == Operator.MULTIPLICATION:
+            if self.evaluate_type(symbol_table) == "int":
+                code += spop(0)
+                code += spop(1)
+                code.append("mul $t2,$t0,$t1")
+                code += spush(2)
+            else:
+                code += spop_double(0)
+                code += spop_double(2)
+                code.append("mul.d $f4, $f2, $f0")
+                code += spush_double(4)
+        elif self.operator == Operator.DIVISION:
+            if self.evaluate_type(symbol_table) == "int":
+                code += spop(0)
+                code += spop(1)
+                code.append("div $t2,$t0,$t1")
+                code += spush(2)
+            else:
+                code += spop_double(0)
+                code += spop_double(2)
+                code.append("div.d $f4, $f2, $f0")
+                code += spush_double(4)
+        elif self.operator == Operator.MODULO:
+            code += spop(0)
+            code += spop(1)
+            code.append("div $t2,$t0,$t1")
+            code.append("mfhi $t2")
+            code += spush(2)
+        elif self.operator == Operator.LTE:  # TODO: double
+            if self.evaluate_type(symbol_table) == "int":
+                code += spop(0)
+                code += spop(1)
+                code.append("sle $t2,$t1,$t0")
+                code += spush(2)
+            # else:
+            #     code += spop_double(0)
+            #     code += spop_double(2)
+            #     code.append()
+            #     code += spush_double(4)
+        elif self.operator == Operator.LT:  # TODO: double
+            if self.evaluate_type(symbol_table) == "int":
+                code += spop(0)
+                code += spop(1)
+                code.append("slt $t2,$t1,$t0")
+                code += spush(2)
+            # else:
+            #     code += spop_double(0)
+            #     code += spop_double(2)
+            #     code.append()
+            #     code += spush_double(4)
+        elif self.operator == Operator.GTE:  # TODO: double
+            if self.evaluate_type(symbol_table) == "int":
+                code += spop(0)
+                code += spop(1)
+                code.append("sge $t2,$t1,$t0")
+                code += spush(2)
+            # else:
+            #     code += spop_double(0)
+            #     code += spop_double(2)
+            #     code.append()
+            #     code += spush_double(4)
+        elif self.operator == Operator.GT:  # TODO: double
+            if self.evaluate_type(symbol_table) == "int":
+                code += spop(0)
+                code += spop(1)
+                code.append("sgt $t2,$t1,$t0")
+                code += spush(2)
+            # else:
+            #     code += spop_double(0)
+            #     code += spop_double(2)
+            #     code.append()
+            #     code += spush_double(4)
+        elif self.operator == Operator.AND:
+            code += spop(0)
+            code += spop(1)
+            code.append("and $t2,$t1,$t0")
+            code += spush(2)
+        elif self.operator == Operator.OR:
+            code += spop(0)
+            code += spop(1)
+            code.append("or $t2,$t1,$t0")
+            code += spush(2)
+        elif self.operator == Operator.EQUALS:  # TODO: String and Double
+            if self.evaluate_type(symbol_table) == "int":
+                code += spop(0)
+                code += spop(1)
+                code.append("seq $t2,$t1,$t0")
+                code += spush(2)
+            # elif self.evaluate_type(symbol_table) == 'double':
+            #     code += spop_double(0)
+            #     code += spop_double(2)
+            #     code.append()
+            #     code += spush_double(4)
+            # else:
+        elif self.operator == Operator.EQUALS:  # TODO: String and Double
+            if self.evaluate_type(symbol_table) == "int":
+                code += spop(0)
+                code += spop(1)
+                code.append("sne $t2,$t1,$t0")
+                code += spush(2)
+            # elif self.evaluate_type(symbol_table) == 'double':
+            #     code += spop_double(0)
+            #     code += spop_double(2)
+            #     code.append()
+            #     code += spush_double(4)
+            # else:
+
         return code
 
 
@@ -143,7 +225,8 @@ class ReadLine(Expression):
 
 @dataclass
 class LValue(Expression):
-    pass
+    def calculate_address(self, symbol_table: SymbolTable):
+        pass
 
 
 OFFSET_TO_FIRST_LOCAL = -8
@@ -175,6 +258,10 @@ class IdentifierLValue(LValue):
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.identifier.evaluate_type(symbol_table)
+
+    def generate_code(self, symbol_table: SymbolTable):
+        # TODO:
+        pass
 
 
 @dataclass
@@ -287,3 +374,26 @@ class Constant(Expression):
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.constant_type
+
+def spop(num):
+    code = [f"lw   $t{num},0($sp)"]
+    code.append("addu $sp,$sp,4")
+    return code
+
+
+def spush(num):
+    code = ["subu $sp,$sp,4"]
+    code.append(f"sw   $t{num},0($sp)")
+    return code
+
+
+def spop_double(num):
+    code = [f"l.d   $f{num},0($sp)"]
+    code.append("addu $sp,$sp,8")
+    return code
+
+
+def spush_double(num):
+    code = ["subu $sp,$sp,8"]
+    code.append(f"s.d   $f{num},0($sp)")
+    return code
