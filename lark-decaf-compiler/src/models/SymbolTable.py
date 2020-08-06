@@ -136,6 +136,6 @@ class SymbolTable:
             size = calc_variable_size(decl.variable_type)
             self.decrement_local_offset(size)
             popped_size_till_now += size
-        self.pop_variables_till_block(
+        return self.pop_variables_till_block(
             scope.parent_scope, block_scope, popped_size_till_now
         )
