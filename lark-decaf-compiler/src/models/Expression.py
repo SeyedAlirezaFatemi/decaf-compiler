@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, List, Union, Tuple
@@ -39,6 +40,13 @@ class Operator(Enum):
     OR = "||"
 
 
+"""
+When we generate code for expressions, we push their result to stack.
+So if you have multiple expressions, first call generate_code on all of them, and then
+    start popping values from stack to access their results.
+"""
+
+
 @dataclass
 class Expression(Node):
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
@@ -67,13 +75,13 @@ class BinaryExpression(Expression):
             return self.left_expression.evaluate_type(symbol_table)
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        code = []
-        code += self.left_expression.generate_code(symbol_table)
-        code += self.right_expression.generate_code(symbol_table)
         left_operand_type = self.left_expression.evaluate_type(symbol_table)
         right_operand_type = self.right_expression.evaluate_type(symbol_table)
         assert left_operand_type == right_operand_type
         operand_type = left_operand_type
+        code = []
+        code += self.left_expression.generate_code(symbol_table)
+        code += self.right_expression.generate_code(symbol_table)
         if self.operator == Operator.ADDITION:
             if operand_type == "int":
                 code += pop_to_temp(0)
@@ -308,6 +316,14 @@ OFFSET_TO_FIRST_GLOBAL = 0
 class IdentifierLValue(LValue):
     identifier: Identifier
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = [f"\t# Code for identifier {self.identifier.name}"]
+        _, address = self.calculate_address(symbol_table)
+        code.append(f"\tlw $t0, {address}\t# load value from {address} to $t0")
+        code += push_to_stack(0)
+        code.append(f"\t# End of code for identifier {self.identifier.name}")
+        return code
+
     def calculate_address(self, symbol_table: SymbolTable) -> Tuple[List[str], str]:
         """
         In a MIPS stack frame, first local is at fp-8, subsequent locals are at fp-12, fp-16, and so on.
@@ -361,36 +377,34 @@ class ArrayAccessLValue(LValue):
         array_type = self.array_expression.evaluate_type(symbol_table)
         assert isinstance(array_type, ArrayType)
         array_element_size = calc_variable_size(array_type.element_type)
-        code = self.array_expression.generate_code(symbol_table)
-        code += pop_to_temp(0)  # array address at $t0
-        code += self.index_expression.generate_code(symbol_table)
+        code = ["\t# Code for array access"]
+        code += self.array_expression.generate_code(
+            symbol_table
+        )  # pushes array address
+        code += self.index_expression.generate_code(symbol_table)  # pushes index
         code += pop_to_temp(1)  # index at $t0
-        code.append(f"\tsll $t1,$t1,{array_element_size}")
+        code += pop_to_temp(0)  # array address at $t0
+        code.append(f"\tsll $t1,$t1,{int(math.sqrt(array_element_size))}")
         code.append(
             f"\taddi $t1, $t1, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array"
         )
         code.append("\taddu $t2,$t1,$t0\t# address of element is now in $t2")
+        code.append("\t# End of code for array access")
         return code, "0($t2)"
 
     def generate_code(self, symbol_table: SymbolTable):
         array_type = self.array_expression.evaluate_type(symbol_table)
         assert isinstance(array_type, ArrayType)
-        array_element_size = calc_variable_size(array_type.element_type)
-        code = self.array_expression.generate_code(symbol_table)
-        code += pop_to_temp(0)  # array address at $t0
-        code += self.index_expression.generate_code(symbol_table)
-        code += pop_to_temp(1)  # index at $t0
-        code.append(f"\tsll $t1,$t1,{array_element_size}")
-        code.append(
-            f"\taddi $t1, $t1, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array"
-        )
-        code.append("\taddu $t2,$t1,$t0\t# address of element is now in $t2")
+        code = ["\t# Code for array access + use"]
+        access_code, access_address = self.calculate_address(symbol_table)
+        code += access_code
         if array_type.element_type == "int":
-            code.append("\tlw $t0, 0($t2)")
+            code.append(f"\tlw $t0, {access_address}")
             code += push_to_stack(0)
         elif array_type.element_type == "double":
-            code.append("\tl.d $f0, 0($t2)")
+            code.append(f"\tl.d $f0, {access_address}")
             code += push_double_to_stack(0)
+        code.append("\t# End of code for array access + use")
         return code
 
 
@@ -404,16 +418,17 @@ class Assignment(Expression):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = self.expression.generate_code(symbol_table)
-        if self.expression.evaluate_type(symbol_table) == "int":
-            code += pop_to_temp(0)
+        # We do not generate_code for l_value. We only need address.
+        if self.expression.evaluate_type(symbol_table) == "double":
             l_value_code, l_value_address = self.l_value.calculate_address(symbol_table)
             code += l_value_code
-            code.append(f"\tsw $t0, {l_value_address}\t# assignment")
-        elif self.expression.evaluate_type(symbol_table) == "double":
-            code += pop_double_to_femp(0)
-            l_value_code, l_value_address = self.l_value.calculate_address(symbol_table)
-            code += l_value_code
+            code += pop_double_to_femp(0)  # expression result
             code.append(f"\ts.d $f0, {l_value_address}\t# assignment")
+        else:
+            l_value_code, l_value_address = self.l_value.calculate_address(symbol_table)
+            code += l_value_code
+            code += pop_to_temp(0)  # expression result
+            code.append(f"\tsw $t0, {l_value_address}\t# assignment")
         return code
 
 
@@ -486,7 +501,7 @@ class InitiateArray(Expression):
         code += pop_to_temp(0)  # now array size is in t0
         code += [
             "\tmove $a0, $t0\t# move array length to $a0",
-            f"\tsll $a0, $a0, {type_size}\t# size of array = length * type_size",
+            f"\tsll $a0, $a0, {int(math.sqrt(type_size))}\t# size of array",
             f"\taddi $a0, $a0, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array",
             "\tli $v0, 9\t#rsbrk",
             "\tsyscall",
@@ -509,7 +524,8 @@ class Constant(Expression):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         size = calc_variable_size(self.constant_type)
         code = [
-            f"\tsubu $sp, $sp, {size}\t# decrement sp to make space for constant {self.value}"
+            f"\t# Code for constant {self.value}",
+            f"\tsubu $sp, $sp, {size}\t# decrement sp to make space for constant {self.value}",
         ]
         if self.constant_type == PrimitiveTypes.DOUBLE:
             code += [
@@ -526,6 +542,7 @@ class Constant(Expression):
                 f"\tli $t0, {self.value}\t# load constant value to $t0",
                 f"\tsw $t0, {size}($sp)\t# load constant value from $to to {size}($sp)",
             ]
+        code.append(f"\t# End of code for constant {self.value}")
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:

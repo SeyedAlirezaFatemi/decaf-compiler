@@ -78,9 +78,13 @@ class HELLO{}
         Print(b);
         Print(10 + 10 * 10);*/
         int[] a;
+        int x;
         a = NewArray(10, int);
         a[2] = 5;
-        Print(a[2]);
+        a[3] = 20;
+        Print(a[2], a[3]);
+        x =10;
+        Print(x);
     }
 """
     )
