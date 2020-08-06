@@ -112,16 +112,12 @@ class PrintStatement(Statement):
     args: List[Expression]
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        # We assume the output of expressions are saved in $v0
+        # We assume the output of expressions are saved in stack
         code = []
         for expression in self.args:
             code += expression.generate_code(symbol_table)
             expr_type = expression.evaluate_type(symbol_table)
             size = calc_variable_size(expr_type)
-            code.append(
-                f"\tsubu $sp, $sp, {size}\t# decrement sp to make space for print param"
-            )
-            code.append(f"\tsw $v0, {size}($sp)\t# copy param value to stack")
             if expr_type.name == PrimitiveTypes.INT.value:
                 code.append(f"\tjal _PrintInt")
             elif expr_type.name == PrimitiveTypes.STRING.value:
