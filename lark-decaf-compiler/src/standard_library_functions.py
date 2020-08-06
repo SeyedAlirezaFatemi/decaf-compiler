@@ -19,7 +19,7 @@ _PrintDouble:
         addiu   $fp, $sp, 8
         
         li      $v0, 3
-        l.s     $f12, 4($fp)    # load double value to $f12
+        l.d     $f12, 8($fp)    # load double value to $f12
         syscall
         
         move    $sp, $fp
@@ -35,6 +35,20 @@ _PrintString:
         addiu   $fp, $sp, 8
         li      $v0, 4
         lw      $a0, 4($fp)
+        syscall
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
+
+
+_PrintNewLine:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        li      $v0, 4
+        la      $a0, NEWLINE
         syscall
         move    $sp, $fp
         lw      $ra, -4($fp)
@@ -188,4 +202,5 @@ eloop4: addi    $t1, -1         # add \0 at the end.
 .data
 TRUE:.asciiz "true"
 FALSE:.asciiz "false"
+NEWLINE:.asciiz "\\n"
 """

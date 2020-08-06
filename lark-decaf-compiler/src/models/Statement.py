@@ -97,13 +97,6 @@ class ReturnStatement(Statement):
         code = []
         if self.return_expression is not None:
             code += self.return_expression.generate_code(symbol_table)
-        # TODO: Shouldn't we move this to the end of FunctionDeclaration?
-        code += [
-            "move    $sp, $fp ",
-            "lw      $ra, -4($fp)",
-            "lw      $fp, 0($fp)",
-            "jr      $ra",
-        ]
         return code
 
 
@@ -112,16 +105,12 @@ class PrintStatement(Statement):
     args: List[Expression]
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        # We assume the output of expressions are saved in $v0
+        # We assume the output of expressions are saved in stack
         code = []
         for expression in self.args:
             code += expression.generate_code(symbol_table)
             expr_type = expression.evaluate_type(symbol_table)
             size = calc_variable_size(expr_type)
-            code.append(
-                f"\tsubu $sp, $sp, {size}\t# decrement sp to make space for print param"
-            )
-            code.append(f"\tsw $v0, {size}($sp)\t# copy param value to stack")
             if expr_type.name == PrimitiveTypes.INT.value:
                 code.append(f"\tjal _PrintInt")
             elif expr_type.name == PrimitiveTypes.STRING.value:
@@ -131,6 +120,7 @@ class PrintStatement(Statement):
             elif expr_type.name == PrimitiveTypes.DOUBLE.value:
                 code.append(f"\tjal _PrintDouble")
             code.append(generate_clean_param_code(size))
+            code.append(f"\tjal _PrintNewLine")
         return code
 
 
