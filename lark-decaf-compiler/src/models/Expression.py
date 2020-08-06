@@ -135,8 +135,8 @@ class BinaryExpression(Expression):
                 code.append("c.le.d $f2,$f0")
                 code.append(f'bc1f __double_le__{symbol_table.get_label()}')
                 code.append('li $t0, 1')
-                code.append(f'__double_le__{symbol_table.get_label()}:')
-                code += push_to_stack(0)
+                code.append(f'__double_le__{symbol_table.get_label()}: subu $sp,$sp,4')
+                code.append('sw $t0,4($sp)')
         elif self.operator == Operator.LT:  # TODO: double
             if operand_type == "int":
                 code += pop_to_temp(0)
