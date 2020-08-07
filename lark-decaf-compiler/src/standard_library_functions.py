@@ -18,8 +18,9 @@ _PrintDouble:
         sw      $ra, 4($sp)
         addiu   $fp, $sp, 8
         
-        li      $v0, 3
-        l.d     $f12, 8($fp)    # load double value to $f12
+        li      $v0, 2
+        l.d     $f12, 0($fp)    # load double value to $f12
+        cvt.s.d $f12, $f12
         syscall
         
         move    $sp, $fp

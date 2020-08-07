@@ -356,18 +356,22 @@ class IdentifierLValue(LValue):
         code = []
         decl = self.identifier.find_declaration(symbol_table)
         assert isinstance(decl, VariableDeclaration)
+        # To load and save double, pointer must point to the end of double.
+        double_offset = 0
+        if decl.variable_type == PrimitiveTypes.DOUBLE:
+            double_offset = 8
         if decl.is_class_member:
             # Class members only accessible in class methods. They're protected.
-            return calculate_member_address(decl.class_member_offset)
+            return calculate_member_address(decl.class_member_offset - double_offset)
         elif decl.is_function_parameter:
             return (
                 code,
-                f"{OFFSET_TO_FIRST_PARAM + decl.function_parameter_offset + calc_variable_size(decl.variable_type)}($fp)",
+                f"{OFFSET_TO_FIRST_PARAM + decl.function_parameter_offset + calc_variable_size(decl.variable_type) - double_offset}($fp)",
             )
         elif decl.is_global:
-            return code, f"{OFFSET_TO_FIRST_GLOBAL - decl.global_offset}($gp)"
+            return code, f"{OFFSET_TO_FIRST_GLOBAL - decl.global_offset - double_offset}($gp)"
         else:
-            return code, f"{OFFSET_TO_FIRST_LOCAL - decl.local_offset}($fp)"
+            return code, f"{OFFSET_TO_FIRST_LOCAL - decl.local_offset - double_offset}($fp)"
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.identifier.evaluate_type(symbol_table)
@@ -690,9 +694,15 @@ class Constant(Expression):
             f"\tsubu $sp, $sp, {size}\t# decrement sp to make space for constant {self.value}",
         ]
         if self.constant_type == PrimitiveTypes.DOUBLE:
+            self.value = self.value.lower()
+            if self.value[-1] == ".":
+                self.value += "0"
+            if ".e" in self.value:
+                index = self.value.find(".e") + 1
+                self.value = self.value[:index] + "0" + self.value[index:]
             code += [
-                f"\tli.d $f12, {self.value}\t# load constant value to $f12",
-                f"\ts.d $f12, {size}($sp)\t# load constant value from $f12 to {size}($sp)",
+                f"\tli.d $f0, {self.value}\t# load constant value to $f12",
+                f"\ts.d $f0, 0($sp)\t# load constant value from $f12 to 0($sp)",
             ]
         elif self.constant_type == PrimitiveTypes.BOOL:
             code += [

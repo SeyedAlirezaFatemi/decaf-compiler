@@ -33,10 +33,11 @@ def push_to_stack(t_num: int = 0, size: int = 4) -> List[str]:
     ]
     return code
 
+# To load and save double, pointer must point to the end of double.
 
 def pop_double_to_femp(f_num: int = 0, size: int = 8) -> List[str]:
     code = [
-        f"\tl.d $f{f_num},{size}($sp)#move top stack to f{f_num}",
+        f"\tl.d $f{f_num},0($sp)# move top stack to f{f_num}",
         f"\taddu $sp,$sp,{size}\t# move sp higher cause of pop",
     ]
     return code
@@ -45,7 +46,7 @@ def pop_double_to_femp(f_num: int = 0, size: int = 8) -> List[str]:
 def push_double_to_stack(f_num: int = 0, size: int = 8) -> List[str]:
     code = [
         f"\tsubu $sp,$sp,{size}\t# move sp down cause of push",
-        f"\ts.d $f{f_num},{size}($sp)\t#copy f{f_num} to stack",
+        f"\ts.d $f{f_num},0($sp)\t# copy f{f_num} to stack",
     ]
     return code
 
