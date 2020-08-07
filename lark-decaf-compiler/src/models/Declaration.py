@@ -70,7 +70,7 @@ class FunctionDeclaration(Declaration):
             "\tsw $ra, 4($sp)\t# save ra",
             "\taddiu $fp, $sp, 8\t# set up new fp",
         ]
-        # TODO: What about objects?
+        # TODO: What about objects? What about them?
         code += self.body.generate_code(symbol_table)
         code += [
             "\tmove $sp, $fp\t\t# pop callee frame off stack",
@@ -89,23 +89,46 @@ class ClassDeclaration(Declaration):
     extends: Optional[Identifier]
     variables: List[VariableDeclaration]
     methods: List[FunctionDeclaration]
-    instance_size: int = 0
-    vtable_size: int = 0
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        pass
+        class_scope = symbol_table.enter_new_scope(owner_class_declaration=self)
+        vars_decls = self.find_variables_declarations()
+        class_member_offset = 0
+        for var_decl in vars_decls:
+            var_decl.class_member_offset = class_member_offset
+            class_member_offset += calc_variable_size(var_decl.variable_type)
+            class_scope.add_declaration(var_decl)
+        code = []
+        for method in self.methods:
+            code += method.generate_code(symbol_table)
+        symbol_table.set_current_scope(class_scope.parent_scope)
+        return code
 
-    def find_parents(
-        self, symbol_table: SymbolTable, parents_found: List[ClassDeclaration] = None
+    def calculate_size(self) -> int:
+        vars_decls = self.find_variables_declarations()
+        size = 0
+        for var_decl in vars_decls:
+            size += calc_variable_size(var_decl.variable_type)
+        return size
+
+    def find_variables_declarations(self) -> List[VariableDeclaration]:
+        parents_decls = self.find_parents_declarations()
+        vars_decls = self.variables.copy()
+        for parent_decl in parents_decls:
+            vars_decls += parent_decl.variables
+        return vars_decls
+
+    def find_parents_declarations(
+        self, parents_found: List[ClassDeclaration] = None
     ) -> List[ClassDeclaration]:
         if parents_found is None:
             parents_found = []
         if self.extends is None:
             return parents_found
-        parent_decl = symbol_table.get_global_scope().lookup(self.extends)
+        parent_decl = self.extends.declaration
         assert isinstance(parent_decl, ClassDeclaration)
         parents_found.append(parent_decl)
-        return parent_decl.find_parents(symbol_table, parents_found)
+        return parent_decl.find_parents_declarations(parents_found)
 
     def find_variable_declaration(
         self, variable_identifier: Identifier

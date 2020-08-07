@@ -141,15 +141,10 @@ class DecafTransformer(Transformer):
         # Extract these from field declarations
         variable_declarations = []
         method_declarations = []
-        class_member_offset = 0
-        class_size = 0
         for field in fields_declarations:
             if isinstance(field, VariableDeclaration):
                 variable_declarations.append(field)
                 field.is_class_member = True
-                field.class_member_offset = class_member_offset
-                class_member_offset += calc_variable_size(field.variable_type)
-                class_size += calc_variable_size(field.variable_type)
             else:
                 method_declarations.append(field)
                 field.is_method = True
@@ -158,7 +153,6 @@ class DecafTransformer(Transformer):
             extend_identifier,
             variable_declarations,
             method_declarations,
-            instance_size=class_size,
         )
         for method in method_declarations:
             method.owner_class = class_declaration
