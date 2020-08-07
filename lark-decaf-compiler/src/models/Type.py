@@ -25,6 +25,9 @@ PRIMITIVE_TYPES = {"int", "double", "bool", "string"}
 class Type(Node):
     name: str
 
+    def is_array(self) -> bool:
+        return False
+
     def __eq__(self, other):
         if isinstance(other, Type):
             return self.name == other.name
@@ -49,3 +52,6 @@ class ArrayType(Type):
     def __init__(self, element_type: Type):
         self.name = f"{element_type.name}[]"
         self.element_type = element_type
+
+    def is_array(self) -> bool:
+        return True

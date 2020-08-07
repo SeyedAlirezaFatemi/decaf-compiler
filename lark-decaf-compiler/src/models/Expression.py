@@ -467,12 +467,27 @@ class MethodCall(Call):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
+        left_type = self.class_expression.evaluate_type(symbol_table)
+        if left_type.is_array():
+            assert self.method_identifier.name == "length"
+            array_expression = self.class_expression
+            code += array_expression.generate_code(
+                symbol_table
+            )  # array pointer in stack now
+            code += pop_to_temp(0)  # array pointer in stack now
+            code += ["\tlw $t1, 0($t0)\t# Move array length to $t1"]
+            code += push_to_stack(1)
+            return code
         method_decl = self._find_method_decl()
         method_label = method_decl.label
         # TODO: call method
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
+        left_type = self.class_expression.evaluate_type(symbol_table)
+        if left_type.is_array():
+            assert self.method_identifier.name == "length"
+            return Type(PrimitiveTypes.INT.value)
         return self._find_method_decl().return_type
 
     def _find_method_decl(self) -> FunctionDeclaration:

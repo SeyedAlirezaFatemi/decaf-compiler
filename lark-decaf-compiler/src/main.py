@@ -85,6 +85,7 @@ class HELLO{}
         Print(a[2], a[3]);
         x =10;
         Print(x);
+        Print(a.length());
     }
 """
     )
