@@ -16,6 +16,7 @@ from ..utils import (
     pop_double_to_femp,
     push_double_to_stack,
     ARRAY_LENGTH_SIZE,
+    THIS_ADDRESS,
 )
 
 if TYPE_CHECKING:
@@ -318,10 +319,17 @@ class IdentifierLValue(LValue):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = [f"\t# Code for identifier {self.identifier.name}"]
-        _, address = self.calculate_address(symbol_table)
-        code.append(f"\tlw $t0, {address}\t# load value from {address} to $t0")
-        code += push_to_stack(0)
-        code.append(f"\t# End of code for identifier {self.identifier.name}")
+        address_calculation_code, address = self.calculate_address(symbol_table)
+        code += address_calculation_code
+        if self.evaluate_type(symbol_table) == PrimitiveTypes.DOUBLE:
+            code.append(f"\tl.d $f0, {address}\t# Load value from {address} to $f0")
+            code += push_double_to_stack(0)
+        else:
+            code.append(f"\tlw $t0, {address}\t# Load value from {address} to $t0")
+            code += push_to_stack(0)
+        code.append(
+            f"\t# End of code for identifier {self.identifier.name}. Identifier value is on top of stack now."
+        )
         return code
 
     def calculate_address(self, symbol_table: SymbolTable) -> Tuple[List[str], str]:
@@ -334,12 +342,12 @@ class IdentifierLValue(LValue):
         decl = self.identifier.find_declaration(symbol_table)
         assert isinstance(decl, VariableDeclaration)
         if decl.is_class_member:
-            # TODO: use this to calc address. use vtable.
-            decl.class_member_offset
+            # Class members only accessible in class methods. They're protected.
+            return calculate_member_address(decl.class_member_offset)
         elif decl.is_function_parameter:
             return (
                 code,
-                f"{OFFSET_TO_FIRST_PARAM + decl.function_parameter_offset}($fp)",
+                f"{OFFSET_TO_FIRST_PARAM + decl.function_parameter_offset + calc_variable_size(decl.variable_type)}($fp)",
             )
         elif decl.is_global:
             return code, f"{OFFSET_TO_FIRST_GLOBAL - decl.global_offset}($gp)"
@@ -350,12 +358,54 @@ class IdentifierLValue(LValue):
         return self.identifier.evaluate_type(symbol_table)
 
 
+def calculate_member_address(member_offset: int) -> Tuple[List[str], str]:
+    code = [
+        "\t# Code for class member address calculation:"
+        f"\tlw $t0, {THIS_ADDRESS}\t# Load 'this' address to $t0.",
+        f"\taddi $t0, $t0, {member_offset}\t# Extra {member_offset} bytes for member offset.",
+        "\tlw $t1, 0($t0)\t# Copy member address to $t1.",
+        "\t# End of code for class member address calculation. Member address is in $t1 now.",
+    ]
+    return code, "0($t1)"
+
+
 @dataclass
 class MemberAccessLValue(LValue):
     expression: Expression
     identifier: Identifier
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        var_decl = self.find_declaration(symbol_table)
+        code = ["\t# Code for class member access:"]
+        address_calculation_code, address = calculate_member_address(
+            var_decl.class_member_offset
+        )
+        code += address_calculation_code
+        if var_decl.variable_type == PrimitiveTypes.DOUBLE:
+            code.append(f"\tl.d $f0, {address}\t# Load value from {address} to $f0.")
+            code += push_double_to_stack(0)
+        else:
+            code.append(f"\tlw $t0, {address}\t# Load value from {address} to $t0.")
+            code += push_to_stack(0)
+        code.append(
+            "\t# End of code for class member access. Member value is on top of stack now."
+        )
+        return code
+
+    def calculate_address(self, symbol_table: SymbolTable) -> Tuple[List[str], str]:
+        var_decl = self.find_declaration(symbol_table)
+        return calculate_member_address(var_decl.class_member_offset)
+
+    def find_declaration(self, symbol_table: SymbolTable) -> VariableDeclaration:
+        var_decl = symbol_table.get_current_scope().lookup_in_class_members(
+            self.identifier
+        )
+        assert isinstance(var_decl, VariableDeclaration)
+        return var_decl
+
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
+        # Based on language description, object members are protected.
+        assert isinstance(self.expression, ThisExpression)
         class_type = self.expression.evaluate_type(symbol_table)
         assert isinstance(class_type, NamedType)
         class_decl = symbol_table.get_global_scope().lookup(class_type.name)

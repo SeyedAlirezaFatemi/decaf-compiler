@@ -93,11 +93,9 @@ class ClassDeclaration(Declaration):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         class_scope = symbol_table.enter_new_scope(owner_class_declaration=self)
         vars_decls = self.find_variables_declarations()
-        class_member_offset = 0
         for var_decl in vars_decls:
-            var_decl.class_member_offset = class_member_offset
-            class_member_offset += calc_variable_size(var_decl.variable_type)
             class_scope.add_declaration(var_decl)
+        # TODO: methods.
         code = []
         for method in self.methods:
             code += method.generate_code(symbol_table)
@@ -116,6 +114,10 @@ class ClassDeclaration(Declaration):
         vars_decls = self.variables.copy()
         for parent_decl in parents_decls:
             vars_decls += parent_decl.variables
+        class_member_offset = 0
+        for var_decl in vars_decls:
+            var_decl.class_member_offset = class_member_offset
+            class_member_offset += calc_variable_size(var_decl.variable_type)
         return vars_decls
 
     def find_parents_declarations(
@@ -134,9 +136,9 @@ class ClassDeclaration(Declaration):
         self, variable_identifier: Identifier
     ) -> VariableDeclaration:
         # The optimal solution is to have the methods in a set.
-        for variable in self.variables:
-            if variable.identifier.name == variable_identifier.name:
-                return variable
+        for var_decl in self.find_variables_declarations():
+            if var_decl.identifier.name == variable_identifier.name:
+                return var_decl
         print(
             f"Error. Method {variable_identifier.name} not found in class {self.identifier.name}!"
         )
