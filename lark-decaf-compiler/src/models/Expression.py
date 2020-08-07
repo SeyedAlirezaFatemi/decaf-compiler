@@ -491,30 +491,38 @@ class Call(Expression):
 class FunctionCall(Call):
     function_identifier: Identifier
     actual_parameters: List[Expression]
-    parameter_bytes: int =0
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
-        function_decl = self._find_function_decl()
+        function_decl = self._find_function_decl(symbol_table)
+        return_type = function_decl.return_type
+        return_size = calc_variable_size(return_type)
         function_label = function_decl.label
-
+        parameter_bytes = 0
         for parameter in self.actual_parameters:
-            self.parameter_bytes+= calc_variable_size(parameter.evaluate_type(symbol_table))
-
-
-
+            parameter_bytes += calc_variable_size(parameter.evaluate_type(symbol_table))
         for parameter in reversed(self.actual_parameters):
-            code+= parameter.generate_code(symbol_table)
-        code.append(f"subu    $sp, $sp, 4")
-        code.append(f"jump {function_label}")
-        code.append(f"addiu $sp, $sp, {self.parameter_bytes + 4}")
+            code += parameter.generate_code(symbol_table)
+        code += [
+            f"\tsubu $sp, $sp, 4\t# Make space for 'this'.",
+            f"\tjal {function_label}",
+            f"\taddiu $sp, $sp, {parameter_bytes + 4}\t# Cleanse stack of function parameters.",
+        ]
+        if return_type == PrimitiveTypes.DOUBLE:
+            code += push_double_to_stack(12)
+        else:
+            code += [
+                f"\tsubu $sp, $sp, {return_size}\t# Make space for function return value.",
+                f"\tsw $v0, {return_size}($sp)\t# Copy return value to stack.",
+            ]
+
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
-        return self._find_function_decl().return_type
+        return self._find_function_decl(symbol_table).return_type
 
-    def _find_function_decl(self) -> FunctionDeclaration:
-        function_decl = self.function_identifier.declaration
+    def _find_function_decl(self, symbol_table: SymbolTable) -> FunctionDeclaration:
+        function_decl = self.function_identifier.find_declaration(symbol_table)
         assert isinstance(function_decl, FunctionDeclaration)
         return function_decl
 
