@@ -550,6 +550,21 @@ class MethodCall(Call):
 class InitiateClass(Expression):
     class_identifier: Identifier
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        class_decl = self.class_identifier.find_declaration(symbol_table)
+        assert isinstance(class_decl, ClassDeclaration)
+        object_size = class_decl.calculate_size(symbol_table)
+        code = [f"\t# Code for object of type {self.class_identifier.name} initiation:"]
+        code += [
+            f"\tli $a0, {object_size}\t# Load object size to $a0.",
+            "\tli $v0, 9\t# rsbrk.",
+            "\tsyscall\t# Object pointer is now in $v0.",
+            "\tsub $sp, $sp, 4\t# Make space for object pointer.",
+            "\tsw $v0, 4($sp)\t# Save object pointer to stack.",
+            f"\t# End of code for object of type {self.class_identifier.name} initiation. Object pointer is not on top of stack.",
+        ]
+        return code
+
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return NamedType(self.class_identifier)
 

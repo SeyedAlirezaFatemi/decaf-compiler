@@ -65,6 +65,12 @@ class HELLO{}
         """
         int i;
         int b;
+        class Hi{
+        int j;
+        }
+        class Hello extends Hi{
+        int l;
+        }
     int main() {
         /*int i;
         for(i = 1; i < 5; i = i + 1) {
@@ -78,6 +84,7 @@ class HELLO{}
         Print(b);
         Print(10 + 10 * 10);*/
         int[] a;
+        Hi k;
         int x;
         a = NewArray(10, int);
         a[2] = 5;
@@ -86,6 +93,7 @@ class HELLO{}
         x =10;
         Print(x);
         Print(a.length());
+        k = new Hi;
     }
 """
     )

@@ -26,7 +26,7 @@ formals: variable ("," variable)* -> pass_up
 class_decl: "class" new_identifier extend_decl implement_decl "{" fields_decl "}" -> new_class
 
 extend_decl: "extends" identifier -> pass_up_first_element
-    | -> pass_up
+    | -> pass_up_first_element
 
 implement_decl: "implements" identifier ("," identifier)* -> pass_up
     | -> pass_up

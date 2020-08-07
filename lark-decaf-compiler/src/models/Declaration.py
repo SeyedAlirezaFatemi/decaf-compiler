@@ -30,15 +30,16 @@ class VariableDeclaration(Declaration):
     local_offset: int = 0
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        code = []
+        code = [f"\t# Code for variable declaration {self.identifier.name}:"]
         current_scope = symbol_table.enter_new_scope()
         current_scope.add_declaration(self)
         if not (self.is_global or self.is_class_member or self.is_function_parameter):
             self.local_offset = symbol_table.get_local_offset()
             symbol_table.increment_local_offset(calc_variable_size(self.variable_type))
             code += [
-                f"subu $sp, $sp, {calc_variable_size(self.variable_type)} # decrement sp to make space for variable {self.identifier.name}"
+                f"\tsubu $sp, $sp, {calc_variable_size(self.variable_type)}\t# Decrement sp to make space for variable {self.identifier.name}."
             ]
+        code.append(f"\t# End of code for variable declaration {self.identifier.name}.")
         return code
 
 
@@ -92,25 +93,27 @@ class ClassDeclaration(Declaration):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         class_scope = symbol_table.enter_new_scope(owner_class_declaration=self)
-        vars_decls = self.find_variables_declarations()
+        vars_decls = self.find_variables_declarations(symbol_table)
         for var_decl in vars_decls:
             class_scope.add_declaration(var_decl)
-        # TODO: methods.
+        # TODO: methods and parent methods. how do we call them? pass vars?
         code = []
         for method in self.methods:
             code += method.generate_code(symbol_table)
         symbol_table.set_current_scope(class_scope.parent_scope)
         return code
 
-    def calculate_size(self) -> int:
-        vars_decls = self.find_variables_declarations()
+    def calculate_size(self, symbol_table: SymbolTable) -> int:
+        vars_decls = self.find_variables_declarations(symbol_table)
         size = 0
         for var_decl in vars_decls:
             size += calc_variable_size(var_decl.variable_type)
         return size
 
-    def find_variables_declarations(self) -> List[VariableDeclaration]:
-        parents_decls = self.find_parents_declarations()
+    def find_variables_declarations(
+        self, symbol_table: SymbolTable
+    ) -> List[VariableDeclaration]:
+        parents_decls = self.find_parents_declarations(symbol_table)
         vars_decls = self.variables.copy()
         for parent_decl in parents_decls:
             vars_decls += parent_decl.variables
@@ -121,16 +124,16 @@ class ClassDeclaration(Declaration):
         return vars_decls
 
     def find_parents_declarations(
-        self, parents_found: List[ClassDeclaration] = None
+        self, symbol_table: SymbolTable, parents_found: List[ClassDeclaration] = None
     ) -> List[ClassDeclaration]:
         if parents_found is None:
             parents_found = []
         if self.extends is None:
             return parents_found
-        parent_decl = self.extends.declaration
+        parent_decl = self.extends.find_declaration(symbol_table)
         assert isinstance(parent_decl, ClassDeclaration)
         parents_found.append(parent_decl)
-        return parent_decl.find_parents_declarations(parents_found)
+        return parent_decl.find_parents_declarations(symbol_table, parents_found)
 
     def find_variable_declaration(
         self, variable_identifier: Identifier
