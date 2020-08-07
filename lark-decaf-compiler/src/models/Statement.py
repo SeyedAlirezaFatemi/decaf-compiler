@@ -36,6 +36,8 @@ class StatementBlock(Statement):
             code += var_decl.generate_code(symbol_table)
         for statement in self.statements:
             code += statement.generate_code(symbol_table)
+            if isinstance(statement, ReturnStatement):
+                break
         # Pop variables in order to correct local offset
         freed_space = symbol_table.pop_variables_till_block(
             symbol_table.get_current_scope(), statement_block_scope
@@ -136,7 +138,7 @@ class PrintStatement(Statement):
             elif expr_type.name == PrimitiveTypes.DOUBLE.value:
                 code.append(f"\tjal _PrintDouble")
             code.append(generate_clean_param_code(size))
-            code.append(f"\tjal _PrintNewLine")
+        code.append(f"\tjal _PrintNewLine")
         return code
 
 

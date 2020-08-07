@@ -96,7 +96,31 @@ class HELLO{}
     }
 """
     )
-    tree = decaf_parser.parse(array_test)
+    tree = decaf_parser.parse("""
+    class Hi{
+            int j;
+            int alo(){
+                int x;
+                int l;
+                j = 540;
+                Print(20);
+                Print(j);
+                l = 999;
+                x = 666;
+                Print(x, l);
+                return 100;
+           
+            }
+            int halo(){
+                Print(this.alo());            
+            }
+        }
+        int main() {
+            Hi k;
+            k = new Hi;
+            k.halo();
+        }
+        """)
     DecafTransformer().transform(tree)
     return
     inputfile = ""
