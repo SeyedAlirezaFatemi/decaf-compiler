@@ -87,7 +87,7 @@ class BinaryExpression(Expression):
             if operand_type == "int":
                 code += pop_to_temp(0)
                 code += pop_to_temp(1)
-                code.append("addu $t2,$t1,$t0")
+                code.append("add $t2,$t1,$t0")
                 code += push_to_stack(2)
             else:
                 code += pop_double_to_femp(0)
