@@ -491,13 +491,23 @@ class Call(Expression):
 class FunctionCall(Call):
     function_identifier: Identifier
     actual_parameters: List[Expression]
+    parameter_bytes: int =0
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = []
         function_decl = self._find_function_decl()
         function_label = function_decl.label
-        # TODO: call function
 
+        for parameter in self.actual_parameters:
+            self.parameter_bytes+= calc_variable_size(parameter.evaluate_type(symbol_table))
+
+
+
+        for parameter in reversed(self.actual_parameters):
+            code+= parameter.generate_code(symbol_table)
+        code.append(f"subu    $sp, $sp, 4")
+        code.append(f"jump {function_label}")
+        code.append(f"addiu $sp, $sp, {self.parameter_bytes + 4}")
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
