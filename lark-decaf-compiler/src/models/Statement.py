@@ -56,6 +56,12 @@ class OptionalExpressionStatement(Statement):
         code = []
         if self.expression is not None:
             code += self.expression.generate_code(symbol_table)
+        # I hope this is right.
+        expr_type = self.expression.evaluate_type(symbol_table)
+        if expr_type == PrimitiveTypes.DOUBLE:
+            pop_double_to_femp(0)
+        else:
+            pop_to_temp(0)
         return code
 
 

@@ -42,9 +42,6 @@ from .models.SymbolTable import SymbolTable
 from .models.Type import Type, ArrayType, NamedType, PrimitiveTypes
 from .utils import calc_variable_size
 
-variable_size = {"int": 4, "string": 100, "double": 8, "bool": 4}
-stack_pointer = 0x7FFFFFFF
-
 
 class DecafTransformer(Transformer):
     def __init__(self):

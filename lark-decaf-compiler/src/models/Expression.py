@@ -293,6 +293,10 @@ class ThisExpression(Expression):
 class ReadInteger(Expression):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = [f"\tjal _ReadInteger"]
+        code += [
+            f"\tsubu $sp,$sp,4\t# Make space for Integer.",
+            f"\tsw $v0,4($sp)\t# Copy Integer to stack.",
+        ]
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
@@ -487,13 +491,17 @@ class Assignment(Expression):
         if self.expression.evaluate_type(symbol_table) == "double":
             l_value_code, l_value_address = self.l_value.calculate_address(symbol_table)
             code += l_value_code
-            code += pop_double_to_femp(0)  # expression result
+            code += pop_double_to_femp(0)  # Expression result
             code.append(f"\ts.d $f0, {l_value_address}\t# assignment")
-        else:  # TODO: Is this right?
+            # Push expression result to stack
+            code += push_double_to_stack(0)
+        else:
             l_value_code, l_value_address = self.l_value.calculate_address(symbol_table)
             code += l_value_code
             code += pop_to_temp(0)  # expression result
             code.append(f"\tsw $t0, {l_value_address}\t# assignment")
+            # Push expression result to stack
+            code += push_to_stack(0)
         return code
 
 
@@ -554,9 +562,11 @@ def generate_call(
     code.append(
         f"\taddiu $sp, $sp, {parameter_bytes + 4}\t# Cleanse stack of function parameters."
     )
+    # Return value is in $v0 for non double return types. For double it's in $f0.
     if return_type == PrimitiveTypes.DOUBLE:
         code += push_double_to_stack(DOUBLE_RETURN_REGISTER_NUMBER)
     else:
+        # Warning: We do this even for void functions.
         code += [
             f"\tsubu $sp, $sp, {return_size}\t# Make space for function return value.",
             f"\tsw $v0, {return_size}($sp)\t# Copy return value to stack.",
