@@ -59,9 +59,9 @@ class OptionalExpressionStatement(Statement):
         # I hope this is right.
         expr_type = self.expression.evaluate_type(symbol_table)
         if expr_type == PrimitiveTypes.DOUBLE:
-            pop_double_to_femp(0)
+            code += pop_double_to_femp(0)
         else:
-            pop_to_temp(0)
+            code += pop_to_temp(0)
         return code
 
 
