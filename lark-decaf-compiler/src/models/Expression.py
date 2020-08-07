@@ -709,6 +709,16 @@ class Constant(Expression):
                 f"\tli $t0, {1 if self.value == 'true' else 0}\t# load constant value to $t0",
                 f"\tsw $t0, {size}($sp)\t# load constant value from $t0 to {size}($sp)",
             ]
+        elif self.constant_type == PrimitiveTypes.STRING:
+            name = f"str_{symbol_table.get_string_cost_count()}"
+            code += [
+                "\t.data",
+                f"{name}:",
+                f'\t.asciiz {self.value}',
+                ".text",
+                f"\tla $t0, {name}\t# Load address",
+                f"\tsw $t0, {size}($sp)\t# Load address from $t0 to {size}($sp)",
+            ]
         else:
             code += [
                 f"\tli $t0, {self.value}\t# load constant value to $t0",

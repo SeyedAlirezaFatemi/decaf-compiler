@@ -60,6 +60,7 @@ class SymbolTable:
     if_number: int = 0
     local_offset: int = 0
     label_counter: int = 0
+    string_const_counter: int = 0
 
     def __init__(self):
         # init global scope
@@ -152,3 +153,7 @@ class SymbolTable:
     def get_label(self):
         self.label_counter += 1
         return self.label_counter
+
+    def get_string_cost_count(self):
+        self.string_const_counter += 1
+        return self.string_const_counter

@@ -155,8 +155,12 @@ class HELLO{}
     a = 100;
     b = 200;
     Print(hi(a, 1.1, b, 100.1));
+    Print("HELLO");
+    Print("Ola");
+    Print("Salam");
+    Print("Just let me die please");
     }""")
-    tree = decaf_parser.parse(class_test)
+    # tree = decaf_parser.parse(class_test)
     DecafTransformer().transform(tree)
     return
     inputfile = ""
