@@ -20,6 +20,7 @@ _PrintDouble:
         
         li      $v0, 2
         l.d     $f12, 0($fp)    # load double value to $f12
+        round.w.d $f12, $f12
         cvt.s.d $f12, $f12
         syscall
         

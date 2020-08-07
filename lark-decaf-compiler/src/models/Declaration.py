@@ -135,9 +135,11 @@ class ClassDeclaration(Declaration):
         self, symbol_table: SymbolTable
     ) -> List[VariableDeclaration]:
         parents_decls = self.all_parents_declarations(symbol_table)
-        vars_decls = self.variables.copy()
-        for parent_decl in parents_decls:
+        vars_decls = []
+        # In reverse. First variable of the highest parent first!
+        for parent_decl in reversed(parents_decls):
             vars_decls += parent_decl.variables
+        vars_decls += self.variables
         class_member_offset = 0
         for var_decl in vars_decls:
             var_decl.class_member_offset = class_member_offset

@@ -24,7 +24,16 @@ int main() {
 
 class_test = """
 double gd;
-class Hi{
+class Greet{
+    double ggg;
+    int brother(){
+    Print("In Brother");
+    ggg = 21381.0;
+    Print(ggg);
+    return 8490;
+    }
+}
+class Hi extends Greet{
     int j;
     int aba;
     int alo(){
@@ -35,6 +44,10 @@ class Hi{
         Print(aba);
         this.go();
         Print(j);
+        brother();
+        Print("After brother");
+        //ggg = 200.0;
+        Print(ggg);
         return 2;
     }
     int go(){
@@ -142,7 +155,8 @@ class HELLO{}
         }
         """
     )
-    tree = decaf_parser.parse("""
+    tree = decaf_parser.parse(
+        """
     double hi(int c,double a, int b, double j){
         Print(b);
         Print(c);
@@ -152,6 +166,7 @@ class HELLO{}
     int main(){
     int a;
     int b;
+    String java;
     a = 100;
     b = 200;
     Print(hi(a, 1.1, b, 100.1));
@@ -159,8 +174,13 @@ class HELLO{}
     Print("Ola");
     Print("Salam");
     Print("Just let me die please");
-    }""")
-    # tree = decaf_parser.parse(class_test)
+    java = ReadLine();
+    Print(java);
+    java = ReadLine();
+    Print(java);
+    }"""
+    )
+    tree = decaf_parser.parse(class_test)
     DecafTransformer().transform(tree)
     return
     inputfile = ""

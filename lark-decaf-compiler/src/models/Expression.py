@@ -369,9 +369,15 @@ class IdentifierLValue(LValue):
                 f"{OFFSET_TO_FIRST_PARAM + decl.function_parameter_offset + calc_variable_size(decl.variable_type) - double_offset}($fp)",
             )
         elif decl.is_global:
-            return code, f"{OFFSET_TO_FIRST_GLOBAL - decl.global_offset - double_offset}($gp)"
+            return (
+                code,
+                f"{OFFSET_TO_FIRST_GLOBAL - decl.global_offset - double_offset}($gp)",
+            )
         else:
-            return code, f"{OFFSET_TO_FIRST_LOCAL - decl.local_offset - double_offset}($fp)"
+            return (
+                code,
+                f"{OFFSET_TO_FIRST_LOCAL - decl.local_offset - double_offset}($fp)",
+            )
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self.identifier.evaluate_type(symbol_table)
@@ -714,7 +720,7 @@ class Constant(Expression):
             code += [
                 "\t.data",
                 f"{name}:",
-                f'\t.asciiz {self.value}',
+                f"\t.asciiz {self.value}",
                 ".text",
                 f"\tla $t0, {name}\t# Load address",
                 f"\tsw $t0, {size}($sp)\t# Load address from $t0 to {size}($sp)",
