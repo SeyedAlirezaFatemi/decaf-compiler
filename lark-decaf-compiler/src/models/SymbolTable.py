@@ -32,9 +32,11 @@ class Scope:
         else:
             return self.parent_scope.lookup(name)
 
-    def lookup_in_class_members(self, identifier: Identifier) -> VariableDeclaration:
+    def lookup_in_class_members(
+        self, symbol_table: SymbolTable, identifier: Identifier
+    ) -> VariableDeclaration:
         class_decl = self.find_which_class_we_are_in()
-        return class_decl.find_variable_declaration(identifier)
+        return class_decl.find_variable_declaration(symbol_table, identifier)
 
     def add_declaration(self, declaration: Declaration):
         self.name_declaration_map[declaration.identifier.name] = declaration

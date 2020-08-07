@@ -53,3 +53,4 @@ def push_double_to_stack(f_num: int = 0, size: int = 8) -> List[str]:
 RETURN_ADDRESS = "-4($fp)"
 THIS_ADDRESS = "4($fp)"
 PREV_FP = "$fp"
+DOUBLE_RETURN_REGISTER_NUMBER = 0

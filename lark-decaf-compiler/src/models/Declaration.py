@@ -93,7 +93,7 @@ class ClassDeclaration(Declaration):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         class_scope = symbol_table.enter_new_scope(owner_class_declaration=self)
-        vars_decls = self.find_variables_declarations(symbol_table)
+        vars_decls = self.all_variables_declarations(symbol_table)
         for var_decl in vars_decls:
             class_scope.add_declaration(var_decl)
         # TODO: methods and parent methods. how do we call them? pass vars?
@@ -104,16 +104,16 @@ class ClassDeclaration(Declaration):
         return code
 
     def calculate_size(self, symbol_table: SymbolTable) -> int:
-        vars_decls = self.find_variables_declarations(symbol_table)
+        vars_decls = self.all_variables_declarations(symbol_table)
         size = 0
         for var_decl in vars_decls:
             size += calc_variable_size(var_decl.variable_type)
         return size
 
-    def find_variables_declarations(
+    def all_variables_declarations(
         self, symbol_table: SymbolTable
     ) -> List[VariableDeclaration]:
-        parents_decls = self.find_parents_declarations(symbol_table)
+        parents_decls = self.all_parents_declarations(symbol_table)
         vars_decls = self.variables.copy()
         for parent_decl in parents_decls:
             vars_decls += parent_decl.variables
@@ -123,7 +123,7 @@ class ClassDeclaration(Declaration):
             class_member_offset += calc_variable_size(var_decl.variable_type)
         return vars_decls
 
-    def find_parents_declarations(
+    def all_parents_declarations(
         self, symbol_table: SymbolTable, parents_found: List[ClassDeclaration] = None
     ) -> List[ClassDeclaration]:
         if parents_found is None:
@@ -133,13 +133,13 @@ class ClassDeclaration(Declaration):
         parent_decl = self.extends.find_declaration(symbol_table)
         assert isinstance(parent_decl, ClassDeclaration)
         parents_found.append(parent_decl)
-        return parent_decl.find_parents_declarations(symbol_table, parents_found)
+        return parent_decl.all_parents_declarations(symbol_table, parents_found)
 
     def find_variable_declaration(
-        self, variable_identifier: Identifier
+        self, symbol_table: SymbolTable, variable_identifier: Identifier
     ) -> VariableDeclaration:
         # The optimal solution is to have the methods in a set.
-        for var_decl in self.find_variables_declarations():
+        for var_decl in self.all_variables_declarations(symbol_table):
             if var_decl.identifier.name == variable_identifier.name:
                 return var_decl
         print(
@@ -147,12 +147,15 @@ class ClassDeclaration(Declaration):
         )
 
     def find_method_declaration(
-        self, method_identifier: Identifier
+        self, symbol_table: SymbolTable, method_identifier: Identifier
     ) -> FunctionDeclaration:
         # The optimal solution is to have the methods in a set.
         for method in self.methods:
             if method.identifier.name == method_identifier.name:
                 return method
-        print(
-            f"Error. Method {method_identifier.name} not found in class {self.identifier.name}!"
-        )
+        parents_decls = self.all_parents_declarations(symbol_table)
+        if len(parents_decls):
+            print(
+                f"Error. Method {method_identifier.name} not found in class {self.identifier.name}!"
+            )
+        return parents_decls[0].find_method_declaration(symbol_table, method_identifier)

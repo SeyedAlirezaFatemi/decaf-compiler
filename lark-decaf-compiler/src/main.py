@@ -67,6 +67,10 @@ class HELLO{}
         int b;
         class Hi{
         int j;
+        int alo(){
+        j = 540;
+        return 100;
+        }
         }
         class Hello extends Hi{
         int l;
@@ -95,9 +99,10 @@ class HELLO{}
         Print(a[2], a[3]);
         x =10;
         Print(x);
-        Print(a.length());
-        k = new Hi;*/
-        Print(hi());
+        Print(a.length());*/
+        Hi k;
+        k = new Hi;
+        Print(k.alo());
     }
 """
     )

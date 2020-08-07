@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, List, Union, Tuple
+from typing import TYPE_CHECKING, List, Union, Tuple, Optional
 
 from .Declaration import ClassDeclaration, FunctionDeclaration, VariableDeclaration
 from .Identifier import Identifier
@@ -17,6 +17,7 @@ from ..utils import (
     push_double_to_stack,
     ARRAY_LENGTH_SIZE,
     THIS_ADDRESS,
+    DOUBLE_RETURN_REGISTER_NUMBER,
 )
 
 if TYPE_CHECKING:
@@ -398,7 +399,7 @@ class MemberAccessLValue(LValue):
 
     def find_declaration(self, symbol_table: SymbolTable) -> VariableDeclaration:
         var_decl = symbol_table.get_current_scope().lookup_in_class_members(
-            self.identifier
+            symbol_table, self.identifier
         )
         assert isinstance(var_decl, VariableDeclaration)
         return var_decl
@@ -410,7 +411,9 @@ class MemberAccessLValue(LValue):
         assert isinstance(class_type, NamedType)
         class_decl = symbol_table.get_global_scope().lookup(class_type.name)
         assert isinstance(class_decl, ClassDeclaration)
-        return class_decl.find_variable_declaration(self.identifier).variable_type
+        return class_decl.find_variable_declaration(
+            symbol_table, self.identifier
+        ).variable_type
 
 
 @dataclass
@@ -493,30 +496,11 @@ class FunctionCall(Call):
     actual_parameters: List[Expression]
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
-        code = []
         function_decl = self._find_function_decl(symbol_table)
         return_type = function_decl.return_type
-        return_size = calc_variable_size(return_type)
-        function_label = function_decl.label
-        parameter_bytes = 0
-        for parameter in self.actual_parameters:
-            parameter_bytes += calc_variable_size(parameter.evaluate_type(symbol_table))
-        for parameter in reversed(self.actual_parameters):
-            code += parameter.generate_code(symbol_table)
-        code += [
-            f"\tsubu $sp, $sp, 4\t# Make space for 'this'.",
-            f"\tjal {function_label}",
-            f"\taddiu $sp, $sp, {parameter_bytes + 4}\t# Cleanse stack of function parameters.",
-        ]
-        if return_type == PrimitiveTypes.DOUBLE:
-            code += push_double_to_stack(12)
-        else:
-            code += [
-                f"\tsubu $sp, $sp, {return_size}\t# Make space for function return value.",
-                f"\tsw $v0, {return_size}($sp)\t# Copy return value to stack.",
-            ]
-
-        return code
+        return generate_call(
+            symbol_table, function_decl, self.actual_parameters, is_method=False
+        )
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         return self._find_function_decl(symbol_table).return_type
@@ -525,6 +509,43 @@ class FunctionCall(Call):
         function_decl = self.function_identifier.find_declaration(symbol_table)
         assert isinstance(function_decl, FunctionDeclaration)
         return function_decl
+
+
+def generate_call(
+    symbol_table: SymbolTable,
+    function_decl: FunctionDeclaration,
+    actual_parameters: List[Expression],
+    is_method: bool = False,
+    class_expression: Optional[Expression] = None,
+):
+    code = []
+    return_type = function_decl.return_type
+    return_size = calc_variable_size(return_type)
+    function_label = function_decl.label
+    parameter_bytes = 0
+    for parameter in actual_parameters:
+        parameter_bytes += calc_variable_size(parameter.evaluate_type(symbol_table))
+    for parameter in reversed(actual_parameters):
+        code += parameter.generate_code(symbol_table)
+    if not is_method:
+        code += [
+            f"\tsubu $sp, $sp, 4\t# Make space for 'this'.",
+            f"\tjal {function_label}",
+        ]
+    else:
+        code += class_expression.generate_code(symbol_table)
+        code += [f"\tjal {function_label}"]
+    code.append(
+        f"\taddiu $sp, $sp, {parameter_bytes + 4}\t# Cleanse stack of function parameters."
+    )
+    if return_type == PrimitiveTypes.DOUBLE:
+        code += push_double_to_stack(DOUBLE_RETURN_REGISTER_NUMBER)
+    else:
+        code += [
+            f"\tsubu $sp, $sp, {return_size}\t# Make space for function return value.",
+            f"\tsw $v0, {return_size}($sp)\t# Copy return value to stack.",
+        ]
+    return code
 
 
 @dataclass
@@ -546,9 +567,15 @@ class MethodCall(Call):
             code += ["\tlw $t1, 0($t0)\t# Move array length to $t1"]
             code += push_to_stack(1)
             return code
-        method_decl = self._find_method_decl()
-        method_label = method_decl.label
-        # TODO: call method
+        method_decl = self._find_method_decl(symbol_table)
+        call_code = generate_call(
+            symbol_table,
+            method_decl,
+            self.actual_parameters,
+            is_method=True,
+            class_expression=self.class_expression,
+        )
+        code += call_code
         return code
 
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
@@ -556,10 +583,20 @@ class MethodCall(Call):
         if left_type.is_array():
             assert self.method_identifier.name == "length"
             return Type(PrimitiveTypes.INT.value)
-        return self._find_method_decl().return_type
+        return self._find_method_decl(symbol_table).return_type
 
-    def _find_method_decl(self) -> FunctionDeclaration:
-        method_decl = self.method_identifier.declaration
+    def _find_class_decl(self, symbol_table: SymbolTable) -> ClassDeclaration:
+        class_type = self.class_expression.evaluate_type(symbol_table)
+        assert isinstance(class_type, NamedType)
+        class_decl = symbol_table.get_global_scope().lookup(class_type.name)
+        assert isinstance(class_decl, ClassDeclaration)
+        return class_decl
+
+    def _find_method_decl(self, symbol_table: SymbolTable) -> FunctionDeclaration:
+        class_decl = self._find_class_decl(symbol_table)
+        method_decl = class_decl.find_method_declaration(
+            symbol_table, self.method_identifier
+        )
         assert isinstance(method_decl, FunctionDeclaration)
         return method_decl
 

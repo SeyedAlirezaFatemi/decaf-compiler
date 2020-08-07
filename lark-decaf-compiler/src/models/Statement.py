@@ -8,6 +8,7 @@ from ..utils import (
     calc_variable_size,
     pop_to_temp,
     pop_double_to_femp,
+    DOUBLE_RETURN_REGISTER_NUMBER,
 )
 from .Declaration import VariableDeclaration
 from .Node import Node
@@ -100,13 +101,15 @@ class ReturnStatement(Statement):
     return_expression: Optional[Expression]
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        """
+        If return_type is double it will be in $f0, otherwise in $v0.
+        """
         code = []
         if self.return_expression is not None:
             code += self.return_expression.generate_code(symbol_table)
             return_type = self.return_expression.evaluate_type(symbol_table)
             if return_type == PrimitiveTypes.DOUBLE:
-                # TODO
-                code += pop_double_to_femp(12)
+                code += pop_double_to_femp(DOUBLE_RETURN_REGISTER_NUMBER)
             else:
                 code += pop_to_temp(0)
                 code += ["\tmove $v0, $t0\t# Copy return value to $v0"]
