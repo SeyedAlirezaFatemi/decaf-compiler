@@ -274,6 +274,16 @@ class UnaryExpression(Expression):
 
 @dataclass
 class ThisExpression(Expression):
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        code = [
+            "\t# Code for 'this' expression",
+            f"\tsubu $sp,$sp,4\t# Make space for 'this' pointer",
+            f"\tlw $t0,{THIS_ADDRESS}\t# Copy 'this' pointer pointer to $t0",
+            f"\tsw $t0,4($sp)\t# Copy 'this' pointer pointer to stack",
+            "\t# End of code for 'this' expression",
+        ]
+        return code
+
     def evaluate_type(self, symbol_table: SymbolTable) -> Type:
         class_decl = symbol_table.get_current_scope().find_which_class_we_are_in()
         return NamedType(class_decl.identifier)
@@ -294,8 +304,8 @@ class ReadLine(Expression):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         code = [f"\tjal _ReadLine"]
         code += [
-            f"\tsubu $sp,$sp,4\t# make space for string pointer",
-            f"\tsw $v0,4($sp)\t#copy string pointer to stack",
+            f"\tsubu $sp,$sp,4\t# Make space for string pointer.",
+            f"\tsw $v0,4($sp)\t# Copy string pointer to stack.",
         ]
         return code
 
@@ -376,6 +386,8 @@ class MemberAccessLValue(LValue):
     identifier: Identifier
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        # Only way to access members. We cant use them outside of the object.
+        assert isinstance(self.expression, ThisExpression)
         var_decl = self.find_declaration(symbol_table)
         code = ["\t# Code for class member access:"]
         address_calculation_code, address = calculate_member_address(
@@ -497,6 +509,11 @@ class FunctionCall(Call):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         function_decl = self._find_function_decl(symbol_table)
+        if function_decl.is_method:
+            # For when we call object method without this.
+            return generate_call(
+                symbol_table, function_decl, self.actual_parameters, is_method=True
+            )
         return generate_call(
             symbol_table, function_decl, self.actual_parameters, is_method=False
         )
@@ -527,13 +544,13 @@ def generate_call(
     for parameter in reversed(actual_parameters):
         code += parameter.generate_code(symbol_table)
     if not is_method:
-        code += [
-            f"\tsubu $sp, $sp, 4\t# Make space for 'this'.",
-            f"\tjal {function_label}",
-        ]
-    else:
+        code += [f"\tsubu $sp, $sp, 4\t# Make space for 'this'."]
+    elif is_method and class_expression is not None:
         code += class_expression.generate_code(symbol_table)
-        code += [f"\tjal {function_label}"]
+    elif is_method:
+        # When we call object method without this. We add it implicitly.
+        code += ThisExpression().generate_code(symbol_table)
+    code += [f"\tjal {function_label}"]
     code.append(
         f"\taddiu $sp, $sp, {parameter_bytes + 4}\t# Cleanse stack of function parameters."
     )

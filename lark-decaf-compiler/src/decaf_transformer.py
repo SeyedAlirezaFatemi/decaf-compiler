@@ -111,6 +111,7 @@ class DecafTransformer(Transformer):
         function_declaration = FunctionDeclaration(
             function_identifier, function_parameters, return_type, function_body
         )
+        function_declaration.stamp_label()
         function_identifier.declaration = function_declaration
         function_identifier.new = True
         offset = 0
@@ -125,6 +126,7 @@ class DecafTransformer(Transformer):
         function_declaration = FunctionDeclaration(
             function_identifier, function_parameters, Type("void"), function_body
         )
+        function_declaration.stamp_label()
         function_identifier.declaration = function_declaration
         function_identifier.new = True
         offset = 0
@@ -155,7 +157,9 @@ class DecafTransformer(Transformer):
             method_declarations,
         )
         for method in method_declarations:
+            assert isinstance(method, FunctionDeclaration)
             method.owner_class = class_declaration
+            method.stamp_label()
         class_identifier.declaration = class_declaration
         class_identifier.new = True
         return class_declaration

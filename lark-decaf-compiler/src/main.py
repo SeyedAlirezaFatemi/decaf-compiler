@@ -9,6 +9,41 @@ from .parser import decaf_parser
 
 logging.basicConfig(level=logging.DEBUG)
 
+array_test = """
+int main() {
+    int[] k;
+    int[] b;
+    k = NewArray(10, int);
+    k[5] = 20;
+    k[4] = 112;
+    b = k;
+    Print(k[4], k[5]);
+    Print(b[4], b[5]);
+}
+"""
+
+class_test = """
+class Hi{
+    int j;
+    int alo(){
+        this.j = 540;
+        Print(j);
+        this.go();
+        Print(j);
+        return 2;
+    }
+    int go(){
+        this.j = 400;
+        return 2;
+    }
+}
+int main() {
+    Hi k;
+    k = new Hi;
+    Print(k.alo());
+}
+"""
+
 
 def main(argv):
     tree = decaf_parser.parse(
@@ -61,24 +96,7 @@ class HELLO{}
     }
 """
     )
-    tree = decaf_parser.parse(
-        """
-        class Hi{
-            int j;
-            int alo(){
-                j = 540;
-                Print(20);
-                Print(j);
-                return 100;
-            }
-        }
-        int main() {
-            Hi k;
-            k = new Hi;
-            Print(k.alo());
-        }
-"""
-    )
+    tree = decaf_parser.parse(array_test)
     DecafTransformer().transform(tree)
     return
     inputfile = ""

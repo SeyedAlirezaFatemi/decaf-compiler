@@ -52,6 +52,14 @@ class FunctionDeclaration(Declaration):
     owner_class: Optional[ClassDeclaration] = None
     label: str = "UNSPECIFIED"
 
+    def stamp_label(self):
+        if self.owner_class is None:
+            self.label = self.identifier.name
+        else:
+            self.label = (
+                f"{self.owner_class.identifier.name}_{self.identifier.name}_meth"
+            )
+
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         # Reset local offset for correct local variable addressing
         symbol_table.reset_local_offset()
@@ -84,6 +92,15 @@ class FunctionDeclaration(Declaration):
         symbol_table.set_current_scope(function_scope.parent_scope)
         return code
 
+    def __eq__(self, other):
+        if isinstance(other, FunctionDeclaration):
+            return (
+                other.identifier.name == self.identifier.name
+                and self.is_method == other.is_method
+                and (self.owner_class.identifier == other.owner_class)
+            )
+        return False
+
 
 @dataclass
 class ClassDeclaration(Declaration):
@@ -94,9 +111,13 @@ class ClassDeclaration(Declaration):
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         class_scope = symbol_table.enter_new_scope(owner_class_declaration=self)
         vars_decls = self.all_variables_declarations(symbol_table)
+        methods_decls = self.all_methods_declarations(symbol_table)
+        # Add attributes to scope
         for var_decl in vars_decls:
             class_scope.add_declaration(var_decl)
-        # TODO: methods and parent methods. how do we call them? pass vars?
+        # Add methods to scope
+        for method_decl in methods_decls:
+            class_scope.add_declaration(method_decl)
         code = []
         for method in self.methods:
             code += method.generate_code(symbol_table)
@@ -122,6 +143,19 @@ class ClassDeclaration(Declaration):
             var_decl.class_member_offset = class_member_offset
             class_member_offset += calc_variable_size(var_decl.variable_type)
         return vars_decls
+
+    def all_methods_declarations(
+        self, symbol_table: SymbolTable
+    ) -> List[FunctionDeclaration]:
+        parents_decls = self.all_parents_declarations(symbol_table)
+        methods_decls = self.methods.copy()
+        method_names = set([method.identifier.name for method in methods_decls])
+        for parent_decl in parents_decls:
+            for method in parent_decl.methods:
+                if method.identifier.name not in method_names:
+                    methods_decls.append(method)
+                    method_names.add(method.identifier.name)
+        return methods_decls
 
     def all_parents_declarations(
         self, symbol_table: SymbolTable, parents_found: List[ClassDeclaration] = None
@@ -159,3 +193,8 @@ class ClassDeclaration(Declaration):
                 f"Error. Method {method_identifier.name} not found in class {self.identifier.name}!"
             )
         return parents_decls[0].find_method_declaration(symbol_table, method_identifier)
+
+    def __eq__(self, other):
+        if isinstance(other, ClassDeclaration):
+            return other.identifier.name == self.identifier.name
+        return False
