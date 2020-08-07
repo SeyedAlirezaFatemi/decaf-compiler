@@ -92,6 +92,21 @@ class ClassDeclaration(Declaration):
     instance_size: int = 0
     vtable_size: int = 0
 
+    def generate_code(self, symbol_table: SymbolTable) -> List[str]:
+        pass
+
+    def find_parents(
+        self, symbol_table: SymbolTable, parents_found: List[ClassDeclaration] = None
+    ) -> List[ClassDeclaration]:
+        if parents_found is None:
+            parents_found = []
+        if self.extends is None:
+            return parents_found
+        parent_decl = symbol_table.get_global_scope().lookup(self.extends)
+        assert isinstance(parent_decl, ClassDeclaration)
+        parents_found.append(parent_decl)
+        return parent_decl.find_parents(symbol_table, parents_found)
+
     def find_variable_declaration(
         self, variable_identifier: Identifier
     ) -> VariableDeclaration:
