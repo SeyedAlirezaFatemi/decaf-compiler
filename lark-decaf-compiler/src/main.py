@@ -23,11 +23,16 @@ int main() {
 """
 
 class_test = """
+double gd;
 class Hi{
     int j;
+    int aba;
     int alo(){
         this.j = 540;
+        this.aba = 90000;
+        gd = 500.0;
         Print(j);
+        Print(aba);
         this.go();
         Print(j);
         return 2;
@@ -39,8 +44,12 @@ class Hi{
 }
 int main() {
     Hi k;
+    double kl;
     k = new Hi;
+    kl = 8909.0;
     Print(k.alo());
+    Print(gd);
+    Print(kl);
 }
 """
 
@@ -96,8 +105,16 @@ class HELLO{}
     }
 """
     )
-    tree = decaf_parser.parse("""
-    class Hi{
+    tree = decaf_parser.parse(
+        """
+    class Man{
+    int b;
+    void fat(int b){
+        Print(b);
+        return;
+    }
+    }
+    class Hi extends Man{
             int j;
             int alo(){
                 int x;
@@ -107,7 +124,9 @@ class HELLO{}
                 Print(j);
                 l = 999;
                 x = 666;
-                Print(x, l);
+                b = 777;
+                Print(x, l, b);
+                fat(4);
                 return 100;
            
             }
@@ -116,11 +135,28 @@ class HELLO{}
             }
         }
         int main() {
-            Hi k;
-            k = new Hi;
-            k.halo();
+            double a;
+            a = 2.2 + 3.5;
+            Print(a);
+            return 0;
         }
-        """)
+        """
+    )
+    tree = decaf_parser.parse("""
+    double hi(int c,double a, int b, double j){
+        Print(b);
+        Print(c);
+        Print(j);
+        return a * a;
+    }
+    int main(){
+    int a;
+    int b;
+    a = 100;
+    b = 200;
+    Print(hi(a, 1.1, b, 100.1));
+    }""")
+    tree = decaf_parser.parse(class_test)
     DecafTransformer().transform(tree)
     return
     inputfile = ""
