@@ -361,10 +361,10 @@ class IdentifierLValue(LValue):
 
 def calculate_member_address(member_offset: int) -> Tuple[List[str], str]:
     code = [
-        "\t# Code for class member address calculation:"
+        "\t# Code for class member address calculation:",
         f"\tlw $t0, {THIS_ADDRESS}\t# Load 'this' address to $t0.",
         f"\taddi $t0, $t0, {member_offset}\t# Extra {member_offset} bytes for member offset.",
-        "\tlw $t1, 0($t0)\t# Copy member address to $t1.",
+        "\tmove $t1, $t0\t# Copy member address to $t1.",
         "\t# End of code for class member address calculation. Member address is in $t1 now.",
     ]
     return code, "0($t1)"
@@ -439,9 +439,9 @@ class ArrayAccessLValue(LValue):
         code += pop_to_temp(0)  # array address at $t0
         code.append(f"\tsll $t1,$t1,{int(math.sqrt(array_element_size))}")
         code.append(
-            f"\taddi $t1, $t1, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array"
+            f"\taddi $t1, $t1, {ARRAY_LENGTH_SIZE}\t# Extra {ARRAY_LENGTH_SIZE} bytes for length of array"
         )
-        code.append("\taddu $t2,$t1,$t0\t# address of element is now in $t2")
+        code.append("\taddu $t2,$t1,$t0\t# Address of element is now in $t2")
         code.append("\t# End of code for array access")
         return code, "0($t2)"
 
@@ -497,7 +497,6 @@ class FunctionCall(Call):
 
     def generate_code(self, symbol_table: SymbolTable) -> List[str]:
         function_decl = self._find_function_decl(symbol_table)
-        return_type = function_decl.return_type
         return generate_call(
             symbol_table, function_decl, self.actual_parameters, is_method=False
         )
@@ -518,7 +517,7 @@ def generate_call(
     is_method: bool = False,
     class_expression: Optional[Expression] = None,
 ):
-    code = []
+    code = [f"\t# Code for {'method' if is_method else 'function'} call."]
     return_type = function_decl.return_type
     return_size = calc_variable_size(return_type)
     function_label = function_decl.label
@@ -545,6 +544,7 @@ def generate_call(
             f"\tsubu $sp, $sp, {return_size}\t# Make space for function return value.",
             f"\tsw $v0, {return_size}($sp)\t# Copy return value to stack.",
         ]
+    code.append(f"\t# End of Code for {'method' if is_method else 'function'} call.")
     return code
 
 
@@ -616,7 +616,7 @@ class InitiateClass(Expression):
             "\tsyscall\t# Object pointer is now in $v0.",
             "\tsub $sp, $sp, 4\t# Make space for object pointer.",
             "\tsw $v0, 4($sp)\t# Save object pointer to stack.",
-            f"\t# End of code for object of type {self.class_identifier.name} initiation. Object pointer is not on top of stack.",
+            f"\t# End of code for object of type {self.class_identifier.name} initiation. Object pointer is now on top of stack.",
         ]
         return code
 
@@ -635,15 +635,15 @@ class InitiateArray(Expression):
         code += self.length_expression.generate_code(symbol_table)
         code += pop_to_temp(0)  # now array size is in t0
         code += [
-            "\tmove $a0, $t0\t# move array length to $a0",
-            f"\tsll $a0, $a0, {int(math.sqrt(type_size))}\t# size of array",
-            f"\taddi $a0, $a0, {ARRAY_LENGTH_SIZE} # extra {ARRAY_LENGTH_SIZE} bytes for length of array",
-            "\tli $v0, 9\t#rsbrk",
+            "\tmove $a0, $t0\t# Move array length to $a0",
+            f"\tsll $a0, $a0, {int(math.sqrt(type_size))}\t# Size of array",
+            f"\taddi $a0, $a0, {ARRAY_LENGTH_SIZE}\t# Extra {ARRAY_LENGTH_SIZE} bytes for length of array",
+            "\tli $v0, 9\t# rsbrk",
             "\tsyscall",
-            "\tsw $t0 0($v0)\t# copy array length to the start of array",
+            "\tsw $t0 0($v0)\t# Copy array length to the start of array",
             # "\taddi $v0, $v0, 4\t# move array pointer after length",
-            "\tsub $sp, $sp, 4\t# make space for array pointer",
-            "\tsw $v0, 4($sp)\t# save array pointer to stack",
+            "\tsub $sp, $sp, 4\t# Make space for array pointer",
+            "\tsw $v0, 4($sp)\t# Save array pointer to stack",
         ]
         return code
 

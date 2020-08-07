@@ -63,47 +63,20 @@ class HELLO{}
     )
     tree = decaf_parser.parse(
         """
-        int i;
-        int b;
         class Hi{
-        int j;
-        int alo(){
-        j = 540;
-        return 100;
+            int j;
+            int alo(){
+                j = 540;
+                Print(20);
+                Print(j);
+                return 100;
+            }
         }
+        int main() {
+            Hi k;
+            k = new Hi;
+            Print(k.alo());
         }
-        class Hello extends Hi{
-        int l;
-        }
-        int hi() {
-        return 4;
-        }
-    int main() {
-        /*int i;
-        for(i = 1; i < 5; i = i + 1) {
-        Print(1);
-        }*/
-        /*i = 0;
-        Print(i);
-        i = 100;
-        Print(i);
-        b = i + 40;
-        Print(b);
-        Print(10 + 10 * 10);*/
-        /*int[] a;
-        Hi k;
-        int x;
-        a = NewArray(10, int);
-        a[2] = 5;
-        a[3] = 20;
-        Print(a[2], a[3]);
-        x =10;
-        Print(x);
-        Print(a.length());*/
-        Hi k;
-        k = new Hi;
-        Print(k.alo());
-    }
 """
     )
     DecafTransformer().transform(tree)
@@ -142,3 +115,27 @@ class HELLO{}
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+
+"""
+/*int i;
+        for(i = 1; i < 5; i = i + 1) {
+        Print(1);
+        }*/
+        /*i = 0;
+        Print(i);
+        i = 100;
+        Print(i);
+        b = i + 40;
+        Print(b);
+        Print(10 + 10 * 10);*/
+        /*int[] a;
+        Hi k;
+        int x;
+        a = NewArray(10, int);
+        a[2] = 5;
+        a[3] = 20;
+        Print(a[2], a[3]);
+        x =10;
+        Print(x);
+        Print(a.length());*/
+        """
