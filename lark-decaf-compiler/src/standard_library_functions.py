@@ -219,6 +219,56 @@ _ITOD:
         lw      $fp, 0($fp)
         jr      $ra
 
+_DTOI:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        
+        l.d $f0,0($fp)     #move top stack to f0
+        li.d $f6, 0.5
+        add.d $f0, $f0, $f6
+        cvt.w.d $f0,$f0
+        mfc1.d $a0,$f0
+                 
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
+
+_ITOB:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        
+        lw $t0,4($fp)           #copy top stack to t0
+        beqz $t0,_itob_label
+        addu $v0,$zero,1
+        b _itob_endlabel
+        
+        _itob_label:
+        add $v0,$zero,$zero
+        _itob_endlabel:
+        
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
+
+_BTOI:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        
+        lw $v0,4($fp)           #copy top stack to t0
+        
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
+        
 .data
 TRUE:.asciiz "true"
 FALSE:.asciiz "false"
