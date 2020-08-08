@@ -1,3 +1,5 @@
+from .models.Type import Type, PrimitiveTypes
+
 standard_library_functions = """
 _PrintInt:
         subu    $sp, $sp, 8
@@ -274,3 +276,47 @@ TRUE:.asciiz "true"
 FALSE:.asciiz "false"
 NEWLINE:.asciiz "\\n"
 """
+
+
+# For standard library functions. Not anything else.
+def create_one_parameter_standard_function_declaration(
+    name: str, label: str, return_type: Type, parameter_type: Type
+):
+    from .models.Declaration import FunctionDeclaration, VariableDeclaration
+    from .models.Identifier import Identifier
+
+    function_identifier = Identifier(name)
+    function_parameter_identifier = Identifier("EMPTY")
+    formal_parameter = VariableDeclaration(
+        function_parameter_identifier,
+        parameter_type,
+        is_function_parameter=True,
+        function_parameter_offset=0,
+    )
+    function_decl = FunctionDeclaration(
+        function_identifier,
+        [formal_parameter],
+        return_type,
+        None,
+        is_method=False,
+        label=label,
+    )
+    function_identifier.declaration = function_decl
+    function_identifier.new = True
+    return function_decl
+
+
+itod = create_one_parameter_standard_function_declaration(
+    "itod", "_ITOD", Type(PrimitiveTypes.DOUBLE.value), Type(PrimitiveTypes.INT.value)
+)
+dtoi = create_one_parameter_standard_function_declaration(
+    "dtoi", "_DTOI", Type(PrimitiveTypes.INT.value), Type(PrimitiveTypes.DOUBLE.value)
+)
+itob = create_one_parameter_standard_function_declaration(
+    "itob", "_ITOB", Type(PrimitiveTypes.BOOL.value), Type(PrimitiveTypes.INT.value)
+)
+btoi = create_one_parameter_standard_function_declaration(
+    "btoi", "_BTOI", Type(PrimitiveTypes.INT.value), Type(PrimitiveTypes.BOOL.value)
+)
+
+STANDARD_LIBRARY_FUNCTIONS = [itob, itod, dtoi, btoi]

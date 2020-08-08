@@ -2,7 +2,10 @@ from typing import List
 
 from lark import Transformer
 
-from .standard_library_functions import standard_library_functions
+from .standard_library_functions import (
+    standard_library_functions,
+    STANDARD_LIBRARY_FUNCTIONS,
+)
 from .models.Declaration import (
     FunctionDeclaration,
     VariableDeclaration,
@@ -326,6 +329,8 @@ class DecafTransformer(Transformer):
         symbol_table = SymbolTable()
         # First Pass
         # Initialize global scope
+        for s in STANDARD_LIBRARY_FUNCTIONS:
+            symbol_table.add_declaration_to_global_scope(s)
         variable_global_offset = 0
         for arg in args:
             symbol_table.add_declaration_to_global_scope(arg)
