@@ -4,9 +4,11 @@ _PrintInt:
         sw      $fp, 8($sp)
         sw      $ra, 4($sp)
         addiu   $fp, $sp, 8
+        
         li      $v0, 1
         lw      $a0, 4($fp)
         syscall
+        
         move    $sp, $fp
         lw      $ra, -4($fp)
         lw      $fp, 0($fp)
@@ -18,9 +20,8 @@ _PrintDouble:
         sw      $ra, 4($sp)
         addiu   $fp, $sp, 8
         
-        li      $v0, 2
+        li      $v0, 3
         l.d     $f12, 0($fp)    # load double value to $f12
-        cvt.s.d $f12, $f12
         syscall
         
         move    $sp, $fp
@@ -34,9 +35,11 @@ _PrintString:
         sw      $fp, 8($sp)
         sw      $ra, 4($sp)
         addiu   $fp, $sp, 8
+        
         li      $v0, 4
         lw      $a0, 4($fp)
         syscall
+        
         move    $sp, $fp
         lw      $ra, -4($fp)
         lw      $fp, 0($fp)
@@ -48,9 +51,11 @@ _PrintNewLine:
         sw      $fp, 8($sp)
         sw      $ra, 4($sp)
         addiu   $fp, $sp, 8
+        
         li      $v0, 4
         la      $a0, NEWLINE
         syscall
+        
         move    $sp, $fp
         lw      $ra, -4($fp)
         lw      $fp, 0($fp)
@@ -199,6 +204,20 @@ eloop4: addi    $t1, -1         # add \0 at the end.
         lw      $fp, 0($fp)     # restore saved fp
         jr      $ra
 
+_ITOD:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        
+        lw $t0,4($fp)           #copy top stack to t0
+        mtc1.d $t0, $f0
+        cvt.d.w $f0, $f0
+                 
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
 
 .data
 TRUE:.asciiz "true"
