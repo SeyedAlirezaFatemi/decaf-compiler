@@ -229,7 +229,7 @@ _DTOI:
 
         l.d $f0,0($fp)     #move top stack to f0
         round.w.s $f0, $f0
-        mfc1 $v0, $f0
+        mfc1.d $v0, $f0
 
         move    $sp, $fp
         lw      $ra, -4($fp)
