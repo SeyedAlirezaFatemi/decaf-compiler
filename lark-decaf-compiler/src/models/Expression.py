@@ -9,6 +9,7 @@ from .Declaration import ClassDeclaration, FunctionDeclaration, VariableDeclarat
 from .Identifier import Identifier
 from .Node import Node
 from .Type import Type, PrimitiveTypes, NamedType, ArrayType
+from ..standard_library_functions import STANDARD_LIBRARY_FUNCTIONS
 from ..utils import (
     calc_variable_size,
     pop_to_temp,
@@ -562,7 +563,8 @@ def generate_call(
     for parameter in reversed(actual_parameters):
         code += parameter.generate_code(symbol_table)
     if not is_method:
-        code += [f"\tsubu $sp, $sp, 4\t# Make space for 'this'."]
+        if function_decl not in STANDARD_LIBRARY_FUNCTIONS:  # No this for standards.
+            code += [f"\tsubu $sp, $sp, 4\t# Make space for 'this'. It won't be used."]
     elif is_method and class_expression is not None:
         code += class_expression.generate_code(symbol_table)
     elif is_method:

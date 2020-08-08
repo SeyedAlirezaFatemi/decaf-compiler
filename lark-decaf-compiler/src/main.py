@@ -9,6 +9,12 @@ from .parser import decaf_parser
 
 logging.basicConfig(level=logging.DEBUG)
 
+op_test = """
+int main(){
+    bool a;
+    a = itob(0);
+    Print(a);
+}"""
 array_test = """
 int main() {
     int[] k;
@@ -66,121 +72,17 @@ int main() {
 }
 """
 
+string_test = """
+int main(){
+    string a;
+    a = "alireza";
+    a = ReadLine();
+    Print(a);
+}"""
+
 
 def main(argv):
-    tree = decaf_parser.parse(
-        """
-    int main(int a, int b, int c) {
-    int a;
-    }
-    void hi() {
-    }
-    class Person implements Nameable {
-    string name;
-
-    void setName(string new_name) {
-        name = new_name;
-    }
-
-    string getName() {
-        return name;
-    }
-
-    int age;
-
-    void setAge(int new_age) {
-        age = new_age;
-    }
-
-    int getAge() {
-        return age;
-    }
-
-    void print() {
-        Print("Name: ", name, " Age: ", age);
-    }
-}
-class HELLO{}
-"""
-    )
-    tree = decaf_parser.parse(
-        """
-    int a;
-    int b;
-    class HELLO{
-        int getAge() {}
-    }
-    int getAge() {
-        for (;x<0;){
-        }
-        Print(1, 2, 3);
-        return;
-    }
-"""
-    )
-    tree = decaf_parser.parse(
-        """
-    class Man{
-    int b;
-    void fat(int b){
-        Print(b);
-        return;
-    }
-    }
-    class Hi extends Man{
-            int j;
-            int alo(){
-                int x;
-                int l;
-                j = 540;
-                Print(20);
-                Print(j);
-                l = 999;
-                x = 666;
-                b = 777;
-                Print(x, l, b);
-                fat(4);
-                return 100;
-           
-            }
-            int halo(){
-                Print(this.alo());            
-            }
-        }
-        int main() {
-            double a;
-            a = 2.2 + 3.5;
-            Print(a);
-            return 0;
-        }
-        """
-    )
-    tree = decaf_parser.parse(
-        """
-    double hi(int c,double a, int b, double j){
-        Print(b);
-        Print(c);
-        Print(j);
-        return a * a;
-    }
-    int main(){
-    int a;
-    int b;
-    String java;
-    a = 100;
-    b = 200;
-    Print(hi(a, 1.1, b, 100.1));
-    Print("HELLO");
-    Print("Ola");
-    Print("Salam");
-    Print("Just let me die please");
-    java = ReadLine();
-    Print(java);
-    java = ReadLine();
-    Print(java);
-    }"""
-    )
-    tree = decaf_parser.parse(class_test)
+    tree = decaf_parser.parse(op_test)
     DecafTransformer().transform(tree)
     return
     inputfile = ""
@@ -217,27 +119,3 @@ class HELLO{}
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-"""
-/*int i;
-        for(i = 1; i < 5; i = i + 1) {
-        Print(1);
-        }*/
-        /*i = 0;
-        Print(i);
-        i = 100;
-        Print(i);
-        b = i + 40;
-        Print(b);
-        Print(10 + 10 * 10);*/
-        /*int[] a;
-        Hi k;
-        int x;
-        a = NewArray(10, int);
-        a[2] = 5;
-        a[3] = 20;
-        Print(a[2], a[3]);
-        x =10;
-        Print(x);
-        Print(a.length());*/
-        """
