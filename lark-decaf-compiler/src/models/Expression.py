@@ -571,9 +571,15 @@ def generate_call(
         # When we call object method without this. We add it implicitly.
         code += ThisExpression().generate_code(symbol_table)
     code += [f"\tjal {function_label}"]
-    code.append(
-        f"\taddiu $sp, $sp, {parameter_bytes + 4}\t# Cleanse stack of function parameters."
-    )
+    if function_decl not in STANDARD_LIBRARY_FUNCTIONS:  # No this for standards.
+        code.append(
+            f"\taddiu $sp, $sp, {parameter_bytes + 4}\t# Cleanse stack of function parameters."
+        )
+    else:
+        # Did not push this for standards.
+        code.append(
+            f"\taddiu $sp, $sp, {parameter_bytes}\t# Cleanse stack of function parameters."
+        )
     # Return value is in $v0 for non double return types. For double it's in $f0.
     if return_type == PrimitiveTypes.DOUBLE:
         code += push_double_to_stack(DOUBLE_RETURN_REGISTER_NUMBER)
