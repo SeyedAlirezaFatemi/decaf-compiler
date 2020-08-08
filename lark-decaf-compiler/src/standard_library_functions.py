@@ -228,9 +228,11 @@ _DTOI:
         addiu   $fp, $sp, 8
 
         l.d $f0,0($fp)     #move top stack to f0
-        round.w.s $f0, $f0
-        mfc1.d $v0, $f0
-
+        li.d $f6, 0.5 # round to nearest integer
+        add.d $f0, $f0, $f6
+        cvt.w.d $f0,$f0
+        mfc1.d $v0,$f0
+        
         move    $sp, $fp
         lw      $ra, -4($fp)
         lw      $fp, 0($fp)
