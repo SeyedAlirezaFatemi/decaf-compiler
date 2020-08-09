@@ -66,53 +66,73 @@ break_stmt: "break" ";" -> break_statement
 
 print_stmt : "Print" "(" expr ("," expr)* ")" ";" -> print_statement
 
-expr : assignment -> pass_up_first_element
+// For operator precedence we write the grammar as follows. From low precedence to high precedence.
+// Like this: expr_n: expr_n+1 op expr_n
+
+expr: expr1 "||" expr -> logical_or
+    | assignment -> pass_up_first_element
+    | expr1 -> pass_up_first_element
+
+expr1: expr2 "&&" expr1 -> logical_and
+    | expr2 -> pass_up_first_element
+
+expr2: expr3 "==" expr2 -> equals_operation
+    | expr3 -> pass_up_first_element
+
+expr3: expr4 "!=" expr3 -> not_equals_operation
+    | expr4 -> pass_up_first_element
+
+expr4: expr5 "<" expr4 -> lt_operation
+    | expr5 -> pass_up_first_element
+
+expr5: expr6 "<=" expr5 -> lte_operation
+    | expr6 -> pass_up_first_element
+
+expr6: expr7 ">" expr6 -> gt_operation
+    | expr7 -> pass_up_first_element
+
+expr7: expr8 ">=" expr7 -> gte_operation
+    | expr8 -> pass_up_first_element
+
+expr8: expr9 "+" expr8 -> addition_operation
+    | expr9 -> pass_up_first_element
+
+expr9: expr9 "-" expr10 -> subtraction_operation
+    | expr10 -> pass_up_first_element
+
+expr10: expr11 "*" expr10 -> multiplication_operation
+    | expr11 -> pass_up_first_element
+
+expr11: expr11 "/" expr12 -> division_operation
+    | expr12 -> pass_up_first_element
+
+expr12: expr12 "%" expr13 -> modulo_operation
+    | expr13 -> pass_up_first_element
+
+expr13: "-" expr14 -> minus_operation
+    | expr14 -> pass_up_first_element
+
+expr14: "!" expr15 -> not_operation
+    | expr15 -> pass_up_first_element
+
+expr15: "(" expr ")" -> pass_up_first_element
     | constant -> pass_up_first_element
     | l_value -> pass_up_first_element
     | "this" -> this_expression
     | call -> pass_up_first_element
-    | "(" expr ")" -> pass_up_first_element
-    | minus -> pass_up_first_element
-    | not -> pass_up_first_element
-    | multiplication -> pass_up_first_element
-    | division -> pass_up_first_element
-    | modulo -> pass_up_first_element
-    | addition -> pass_up_first_element
-    | subtraction -> pass_up_first_element
-    | inequality -> pass_up_first_element
-    | equality -> pass_up_first_element
-    | logical_and -> pass_up_first_element
-    | logical_or -> pass_up_first_element
     | "ReadInteger" "(" ")" -> read_integer
     | "ReadLine" "(" ")" -> read_line
     | "new" identifier -> initiate_class
     | "NewArray" "(" expr "," type ")" -> initiate_array
 
-minus.8: "-" expr -> minus_operation
-not.8: "!" expr -> not_operation
-
-multiplication.7: expr "*" expr -> multiplication_operation
-division.7: expr "/" expr -> division_operation
-modulo.7: expr "%" expr -> modulo_operation
-addition.6: expr "+" expr -> addition_operation
-subtraction.6: expr "-" expr -> subtraction_operation
-inequality.5: expr "<=" expr -> lte_operation
-    | expr "<" expr -> lt_operation
-    | expr ">=" expr -> gte_operation
-    | expr ">" expr -> gt_operation
-equality.5: expr "==" expr -> equals_operation
-    | expr "!=" expr -> not_equals_operation
-logical_and.4: expr "&&" expr -> and_operation 
-logical_or.4: expr "||" expr -> or_operation
-
 assignment: l_value "=" expr -> assignment
 
 l_value: identifier -> identifier_l_value
-    | expr "." identifier -> member_access_l_value
-    | expr "[" expr "]" -> array_access_l_value
+    | expr15 "." identifier -> member_access_l_value
+    | expr15 "[" expr "]" -> array_access_l_value
 
 call: identifier "(" actuals ")" -> function_call
-    | expr "." identifier "(" actuals ")" -> method_call
+    | expr15 "." identifier "(" actuals ")" -> method_call
 
 actuals:  expr ("," expr)* -> pass_up
     | -> pass_up
