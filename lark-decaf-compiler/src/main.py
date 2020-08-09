@@ -118,4 +118,12 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    raw_code = array_test
+    tree = decaf_parser.parse(raw_code)
+    code = DecafTransformer().transform(tree)
+    with open("out.asm", "w") as output_file:
+        # write result to output file.
+        print("\n".join(code), file=output_file)
+        print(standard_library_functions, file=output_file)
+
     main(sys.argv[1:])
