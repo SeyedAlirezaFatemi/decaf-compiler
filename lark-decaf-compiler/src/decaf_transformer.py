@@ -345,7 +345,8 @@ class DecafTransformer(Transformer):
         for arg in args:
             code_part = arg.generate_code(symbol_table)
             code += code_part
+        return code
         # Write on file
-        with open("out.asm", "w") as f:
-            print("\n".join(code), file=f)
-            print(standard_library_functions, file=f)
+        # with open("out.asm", "w") as f:
+        #     print("\n".join(code), file=f)
+        #     print(standard_library_functions, file=f)

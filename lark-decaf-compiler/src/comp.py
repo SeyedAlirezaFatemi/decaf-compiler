@@ -2,20 +2,19 @@ import sys, getopt
 
 
 def main(argv):
-
     try:
         opts, args = getopt.getopt(argv, "ha:b:o:", ["inputa=", "inputb=", "output="])
     except getopt.GetoptError:
-        print("main.py -a <inputfile> -b <inputfile> -o <outputfile>")
+        print('main.py -a <inputfile> -b <inputfile> -o <outputfile>')
         sys.exit(2)
 
-    inputfile1 = ""
-    inputfile2 = ""
-    outputfile = ""
+    inputfile1 = ''
+    inputfile2 = ''
+    outputfile = ''
     output = []
     for opt, arg in opts:
-        if opt == "-h":
-            print("test.py -a <firstfile> -b <secondfile> -o <reportfile>")
+        if opt == '-h':
+            print('test.py -a <firstfile> -b <secondfile> -o <reportfile>')
             sys.exit()
         elif opt in ("-a", "--inputa"):
             inputfile1 = arg
@@ -26,11 +25,22 @@ def main(argv):
 
     input1_lines = []
     input2_lines = []
+    back_str = ""
     with open(inputfile1, "r") as input_file:
+        cntr = 0
         for line in input_file:
+            if cntr < 5:
+                cntr += 1
+                continue
             l = line.strip()
+            back_str += l
             if l != "":
                 input1_lines.append(line.strip())
+        input_file.close()
+
+    with open(inputfile1, "w") as input_file:
+        input_file.write(back_str)
+        input_file.close()
 
     with open(inputfile2, "r") as input_file:
         for line in input_file:
@@ -40,10 +50,9 @@ def main(argv):
 
     if len(input1_lines) != len(input2_lines):
         output = [
-            "different line count in these files! : file {} : #{} , file {} : #{}".format(
-                inputfile1, len(input1_lines), inputfile2, len(input2_lines)
-            )
-        ]
+            "different line count in these files! : file {} : #{} , file {} : #{}".format(inputfile1, len(input1_lines),
+                                                                                          inputfile2,
+                                                                                          len(input2_lines))]
         with open(outputfile, "w") as output_file:
             for item in output:
                 output_file.write("{} \n".format(item))
@@ -53,10 +62,13 @@ def main(argv):
     for i in range(len(input1_lines)):
         if input1_lines[i] != input2_lines[i]:
             output.append(
-                "difference in line #{}: file: {} -----> content: {} <> file: {} -----> content: {}".format(
-                    i + 1, inputfile1, input1_lines[i], inputfile2, input2_lines[i]
-                )
-            )
+                "difference in line #{}: file: {} -----> content: {} <> file: {} -----> content: {}".format(i + 1,
+                                                                                                            inputfile1,
+                                                                                                            input1_lines[
+                                                                                                                i],
+                                                                                                            inputfile2,
+                                                                                                            input2_lines[
+                                                                                                                i]))
             is_ok = False
 
     if is_ok:
@@ -72,6 +84,6 @@ def main(argv):
         return 1
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = main(sys.argv[1:])
     sys.exit(result)

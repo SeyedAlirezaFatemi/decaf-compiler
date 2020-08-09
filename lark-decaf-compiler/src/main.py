@@ -6,6 +6,7 @@ import sys
 
 from .decaf_transformer import DecafTransformer
 from .parser import decaf_parser
+from .standard_library_functions import standard_library_functions
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -83,7 +84,7 @@ int main(){
 
 def main(argv):
     tree = decaf_parser.parse(op_test)
-    DecafTransformer().transform(tree)
+    code = DecafTransformer().transform(tree)
     return
     inputfile = ""
     outputfile = ""
@@ -113,8 +114,8 @@ def main(argv):
 
     with open("out/" + outputfile, "w") as output_file:
         # write result to output file.
-        # for the sake of testing :
-        output_file.write("YES" if success else "NO")
+        print("\n".join(code), file=output_file)
+        print(standard_library_functions, file=output_file)
 
 
 if __name__ == "__main__":
