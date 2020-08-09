@@ -16,15 +16,49 @@ _PrintInt:
         lw      $fp, 0($fp)
         jr      $ra
 
+_PrintDoubleWithoutFourDecimal:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        li      $v0, 3
+        l.d     $f12, 0($fp)    # load double value to $f12
+        syscall
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
+        
 _PrintDouble:
         subu    $sp, $sp, 8
         sw      $fp, 8($sp)
         sw      $ra, 4($sp)
         addiu   $fp, $sp, 8
 
-        li      $v0, 3
         l.d     $f12, 0($fp)    # load double value to $f12
+        
+        cvt.w.d  $f0,$f12
+        mfc1 $a0, $f0
+        li      $v0, 1
         syscall
+        move $t0, $a0
+        
+        li      $v0, 4
+        la      $a0, DOT
+        syscall
+        
+        mtc1.d $t0, $f0
+        cvt.d.w $f0, $f0
+        sub.d $f4, $f0, $f12
+        
+        
+        l.d $f0, CONST10000
+        mul.d $f12, $f0, $f4
+        cvt.w.d  $f0,$f12
+        mfc1 $a0, $f0
+        li      $v0, 1
+        syscall
+        
 
         move    $sp, $fp
         lw      $ra, -4($fp)
@@ -275,6 +309,9 @@ _BTOI:
 TRUE:.asciiz "true"
 FALSE:.asciiz "false"
 NEWLINE:.asciiz "\\n"
+DOT: .asciiz "."
+CONST10000: .double -10000.0
+
 """
 
 
