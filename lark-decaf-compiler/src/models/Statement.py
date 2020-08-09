@@ -96,7 +96,7 @@ class IfStatement(Statement):
             code += pop_to_temp(1)
             code.append(f"beqz $t1, {self.start_else_label}")
             code += self.body_statement.generate_code(symbol_table)
-            code.append(f"jmp {self.end_else_label}")
+            code.append(f"j {self.end_else_label}")
             code.append(f"{self.start_else_label}:")
             code += self.else_body_statement.generate_code(symbol_table)
             code.append(f"{self.end_else_label}:")
