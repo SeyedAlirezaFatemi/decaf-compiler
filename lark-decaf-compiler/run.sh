@@ -13,14 +13,15 @@ cd ../
 for filelist in ${dirlist[*]}; do
   filename=$(echo $filelist | cut -d'.' -f1)
   output_filename="$filename.out"
-  output_asm="$filename.out"
+  code_output_filename="$filename.s"
+  output_asm="$filename.s"
   program_input="$filename.in"
   report_filename="$filename.report.txt"
   echo "Running Test $filename -------------------------------------"
   if command -v python3; then
-    python3 -m src.main -i $filelist -o $output_filename
+    python3 -m src.main -i $filelist -o $code_output_filename
   else
-    python -m src.main -i $filelist -o $output_filename
+    python -m src.main -i $filelist -o $code_output_filename
   fi
   if [ $? -eq 0 ]; then
     echo "Code Compiled Successfuly!"
