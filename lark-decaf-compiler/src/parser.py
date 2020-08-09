@@ -143,8 +143,10 @@ new_identifier: IDENT -> new_identifier
 constant: INTEGER -> int_const
     | DOUBLE -> double_const
     | BOOL -> bool_const
+    | NULL -> null_const
     | STRING -> string_const
-    | "null" -> null_const
+
+NULL.5: "null"
 
 PRIM.2: "int"
     | "double"

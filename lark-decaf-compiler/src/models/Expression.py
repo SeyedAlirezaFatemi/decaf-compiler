@@ -734,6 +734,9 @@ class Constant(Expression):
                 f"\tla $t0, {name}\t# Load address",
                 f"\tsw $t0, {size}($sp)\t# Load address from $t0 to {size}($sp)",
             ]
+        elif self.constant_type == PrimitiveTypes.NULL:
+            # Do nothing. Right?
+            code += []
         else:
             code += [
                 f"\tli $t0, {self.value}\t# load constant value to $t0",
