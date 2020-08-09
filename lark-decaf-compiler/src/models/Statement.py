@@ -56,12 +56,12 @@ class OptionalExpressionStatement(Statement):
         code = []
         if self.expression is not None:
             code += self.expression.generate_code(symbol_table)
-        # I hope this is right.
-        expr_type = self.expression.evaluate_type(symbol_table)
-        if expr_type == PrimitiveTypes.DOUBLE:
-            code += pop_double_to_femp(0)
-        else:
-            code += pop_to_temp(0)
+            # I hope this is right.
+            expr_type = self.expression.evaluate_type(symbol_table)
+            if expr_type == PrimitiveTypes.DOUBLE:
+                code += pop_double_to_femp(0)
+            else:
+                code += pop_to_temp(0)
         return code
 
 
@@ -189,9 +189,9 @@ class ForStatement(Statement):
         self.for_number = symbol_table.get_current_for_number()
         self.start_label = "for_" + str(self.for_number)
         self.end_label = "end_for_" + str(self.for_number)
-
         if self.initialization_expression is not None:
             code += self.initialization_expression.generate_code(symbol_table)
+            code += pop_to_temp(0)
         code.append(f"{self.start_label}:")
         code += self.condition_expression.generate_code(symbol_table)
         code += pop_to_temp(1)
@@ -199,6 +199,7 @@ class ForStatement(Statement):
         code += self.body_statement.generate_code(symbol_table)
         if self.update_expression is not None:
             code += self.update_expression.generate_code(symbol_table)
+            code += pop_to_temp(0)
         code.append(f"\tj {self.start_label}\t# back to start of for")
         code.append(f"{self.end_label}:")
 
