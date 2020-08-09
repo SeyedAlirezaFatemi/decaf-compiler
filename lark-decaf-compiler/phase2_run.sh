@@ -1,7 +1,7 @@
 #!/bin/bash
 mkdir -p out
 mkdir -p report
-cd ./tests
+cd ./phase2_tests
 prefix="t"
 dirlist=($(ls ${prefix}*.in))
 OUTPUT_DIRECTORY="out/"

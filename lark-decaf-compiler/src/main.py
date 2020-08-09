@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import getopt
 import logging
+import os
 import sys
 
 from .decaf_transformer import DecafTransformer
@@ -83,9 +84,6 @@ int main(){
 
 
 def main(argv):
-    tree = decaf_parser.parse(op_test)
-    code = DecafTransformer().transform(tree)
-    return
     inputfile = ""
     outputfile = ""
     try:
@@ -101,18 +99,19 @@ def main(argv):
             inputfile = arg
         elif opt in ("-o", "--ofile"):
             outputfile = arg
-
-    success = True
-    with open("tests/" + inputfile, "r") as input_file:
-
+    print(os.path.abspath(os.path.join("Tests", inputfile)))
+    print(os.path.join("out", outputfile))
+    with open(os.path.join("Tests", inputfile), "r") as input_file:
         try:
-            tree = decaf_parser.parse(input_file.read())
-            DecafTransformer().transform(tree)
+            raw_code = input_file.read()
+            tree = decaf_parser.parse(raw_code)
+            code = DecafTransformer().transform(tree)
         except BaseException as e:
-            # print(e)
-            success = False
+            print(inputfile)
+            print(e)
+            sys.exit(1)
 
-    with open("out/" + outputfile, "w") as output_file:
+    with open(os.path.join("out", outputfile), "w") as output_file:
         # write result to output file.
         print("\n".join(code), file=output_file)
         print(standard_library_functions, file=output_file)
