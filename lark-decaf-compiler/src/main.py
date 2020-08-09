@@ -11,6 +11,11 @@ from .standard_library_functions import standard_library_functions
 
 logging.basicConfig(level=logging.DEBUG)
 
+print_test = """
+int main(){
+    Print(566.66);
+}
+"""
 op_test = """
 int main(){
     bool a;
@@ -118,7 +123,7 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    raw_code = array_test
+    raw_code = print_test
     tree = decaf_parser.parse(raw_code)
     code = DecafTransformer().transform(tree)
     with open("out.asm", "w") as output_file:

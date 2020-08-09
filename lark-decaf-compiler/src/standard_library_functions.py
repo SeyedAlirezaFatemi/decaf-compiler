@@ -16,6 +16,21 @@ _PrintInt:
         lw      $fp, 0($fp)
         jr      $ra
 
+_SimplePrintDouble:
+        subu    $sp, $sp, 8
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        addiu   $fp, $sp, 8
+        
+        li      $v0, 3
+        l.d     $f12, 0($fp)    # load double value to $f12
+        syscall
+        
+        move    $sp, $fp
+        lw      $ra, -4($fp)
+        lw      $fp, 0($fp)
+        jr      $ra
+
 _PrintDoubleWithoutFourDecimal:
         subu    $sp, $sp, 8
         sw      $fp, 8($sp)

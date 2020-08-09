@@ -142,7 +142,8 @@ class PrintStatement(Statement):
             elif expr_type.name == PrimitiveTypes.BOOL.value:
                 code.append(f"\tjal _PrintBool")
             elif expr_type.name == PrimitiveTypes.DOUBLE.value:
-                code.append(f"\tjal _PrintDouble")
+                # code.append(f"\tjal _PrintDouble")
+                code.append(f"\tjal _SimplePrintDouble")
             code.append(generate_clean_param_code(size))
         code.append(f"\tjal _PrintNewLine")
         return code
