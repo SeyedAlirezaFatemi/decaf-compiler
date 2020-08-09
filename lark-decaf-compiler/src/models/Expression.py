@@ -47,6 +47,7 @@ class Operator(Enum):
 When we generate code for expressions, we push their result to stack.
 So if you have multiple expressions, first call generate_code on all of them, and then
     start popping values from stack to access their results.
+Don't forget to pop expressions results after evaluating them.
 """
 
 
