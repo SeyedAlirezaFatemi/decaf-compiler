@@ -16,6 +16,15 @@ int main(){
     Print(566.66);
 }
 """
+null_test = """
+int main(){
+    string a;
+    a = null;
+    Print(a);
+    a = "ali";
+    Print(a);
+}
+"""
 op_test = """
 int main(){
     bool a;
@@ -104,15 +113,12 @@ def main(argv):
             inputfile = arg
         elif opt in ("-o", "--ofile"):
             outputfile = arg
-    print(os.path.abspath(os.path.join("Tests", inputfile)))
-    print(os.path.join("out", outputfile))
-    with open(os.path.join("Tests", inputfile), "r") as input_file:
+    with open(os.path.join("tests", inputfile), "r") as input_file:
         try:
             raw_code = input_file.read()
             tree = decaf_parser.parse(raw_code)
             code = DecafTransformer().transform(tree)
         except BaseException as e:
-            print(inputfile)
             print(e)
             sys.exit(1)
 
@@ -123,12 +129,12 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    raw_code = print_test
-    tree = decaf_parser.parse(raw_code)
-    code = DecafTransformer().transform(tree)
-    with open("out.asm", "w") as output_file:
-        # write result to output file.
-        print("\n".join(code), file=output_file)
-        print(standard_library_functions, file=output_file)
+    # raw_code = null_test
+    # tree = decaf_parser.parse(raw_code)
+    # code = DecafTransformer().transform(tree)
+    # with open("out.asm", "w") as output_file:
+    #     # write result to output file.
+    #     print("\n".join(code), file=output_file)
+    #     print(standard_library_functions, file=output_file)
 
     main(sys.argv[1:])
